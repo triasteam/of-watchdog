@@ -31,13 +31,19 @@ type Publish interface {
 	Reply(data *FulFilledRequest)
 }
 
+type Configure interface {
+	ChainID() int64
+	ChainAddr() string
+	Key() *keystore.Key
+	FuncClientAddr() string
+	FuncOracleClientAddr() string
+}
+
 type Subscriber struct {
-	functionClientAddr string
-	functionOracleAddr string
-	ethAddr            string
-	ethCli             *ethclient.Client
-	functionClient     *actor.FunctionClient
-	oracleClient       *actor.FunctionOracle
+	Configure
+	ethCli         *ethclient.Client
+	functionClient *actor.FunctionClient
+	oracleClient   *actor.FunctionOracle
 
 	renewChan   chan struct{}
 	dailEthDone chan struct{}
@@ -46,28 +52,18 @@ type Subscriber struct {
 
 	publishChannel chan []byte
 	repliedChan    chan *FulFilledRequest
-
-	key     *keystore.Key //TODO: env config
-	chainId int64         //TODO: env config
 }
 
-func NewSubscriber(functionClientAddr, functionOracleAddr, nodeAddr string) *Subscriber {
-	pw := "123456"
-	key, err := keystore.DecryptKey([]byte(rawKey), pw)
-	if err != nil {
-		logger.Fatal("wrong key", "key", string(rawKey), "pw", pw)
-	}
+func NewSubscriber(cfg Configure) *Subscriber {
+
 	sub := &Subscriber{
-		functionClientAddr: functionClientAddr,
-		functionOracleAddr: functionOracleAddr,
-		ethAddr:            nodeAddr,
-		renewChan:          make(chan struct{}),
-		dailEthDone:        make(chan struct{}),
-		publishChannel:     make(chan []byte, 100),
-		repliedChan:        make(chan *FulFilledRequest, 100),
-		cleanOnce:          sync.Once{},
-		key:                key,
-		chainId:            12345678,
+		Configure: cfg,
+
+		renewChan:      make(chan struct{}),
+		dailEthDone:    make(chan struct{}),
+		publishChannel: make(chan []byte, 100),
+		repliedChan:    make(chan *FulFilledRequest, 100),
+		cleanOnce:      sync.Once{},
 	}
 
 	go sub.ConnectLoop()
@@ -89,11 +85,11 @@ func (cs *Subscriber) Clean() {
 func (cs *Subscriber) resetEthCli(cli *ethclient.Client) {
 
 	cs.ethCli = cli
-	funcCli, err := actor.NewFunctionClient(common.HexToAddress(cs.functionClientAddr), cs.ethCli)
+	funcCli, err := actor.NewFunctionClient(common.HexToAddress(cs.FuncClientAddr()), cs.ethCli)
 	if err != nil {
 		logger.Error("failed to new FunctionClient", "err", err)
 	}
-	oracleCli, err := actor.NewFunctionOracle(common.HexToAddress(cs.functionOracleAddr), cs.ethCli)
+	oracleCli, err := actor.NewFunctionOracle(common.HexToAddress(cs.FuncOracleClientAddr()), cs.ethCli)
 	if err != nil {
 		logger.Error("failed to new FunctionOracle", "err", err)
 	}
@@ -108,7 +104,7 @@ func (cs *Subscriber) retryDailEth(addr string) {
 
 			ethCli, err := ethclient.Dial(addr)
 			if err != nil {
-				logger.Error("failed to connect to ", "node addr", cs.ethAddr)
+				logger.Error("failed to connect to ", "node addr", cs.ChainAddr())
 				return err
 			}
 			cs.resetEthCli(ethCli)
@@ -133,7 +129,7 @@ func (cs *Subscriber) ConnectLoop() {
 				logger.Error("resubscribe channel is closed")
 				panic("resubscribe channel is closed")
 			}
-			cs.retryDailEth(cs.ethAddr)
+			cs.retryDailEth(cs.ChainAddr())
 			cs.dailEthDone <- struct{}{}
 
 		}
@@ -160,7 +156,7 @@ func (cs *Subscriber) FulfillRequest() {
 				logger.Error("failed to decode request id", "requestId", ret.RequestId)
 				continue
 			}
-			auth, err := bind.NewKeyedTransactorWithChainID(cs.key.PrivateKey, new(big.Int).SetInt64(cs.chainId))
+			auth, err := bind.NewKeyedTransactorWithChainID(cs.Key().PrivateKey, new(big.Int).SetInt64(cs.ChainID()))
 			if err != nil {
 				logger.Error("failed to new keyed tx", "err", err)
 				continue
@@ -217,7 +213,7 @@ func (cs *Subscriber) Receive() chan []byte {
 func (cs *Subscriber) watch() {
 
 	query := ethereum.FilterQuery{
-		Addresses: []common.Address{common.HexToAddress(cs.functionOracleAddr), common.HexToAddress(cs.functionOracleAddr)},
+		Addresses: []common.Address{common.HexToAddress(cs.FuncClientAddr()), common.HexToAddress(cs.FuncOracleClientAddr())},
 	}
 	logs := make(chan types.Log)
 	var (
@@ -329,22 +325,6 @@ func (cs *Subscriber) selectEvent(vLog types.Log) (interface{}, error) {
 	}
 	return data, nil
 }
-
-//type CodeLanguage uint
-//
-//const (
-//	NotSupportedLang CodeLanguage = iota
-//	Golang
-//)
-//
-//type Request struct {
-//	//Location     codeLocation
-//	//Location     secretsLocation
-//	language CodeLanguage
-//	source   string // Source code for Location.Inline or url for Location.Remote
-//	secrets  []byte // Encrypted secrets blob for Location.Inline or url for Location.Remote
-//	args     []string
-//}
 
 type FunctionRequest struct {
 	FunctionName string

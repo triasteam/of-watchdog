@@ -10,8 +10,8 @@ import (
 	"os"
 
 	units "github.com/docker/go-units"
+	"github.com/openfaas/of-watchdog/logger"
 
-	"log"
 	"net/http"
 	"os/exec"
 	"strings"
@@ -26,7 +26,7 @@ type SerializingForkFunctionRunner struct {
 	LogBufferSize int
 }
 
-// Run run a fork for each invocation
+// Run runs a fork for each invocation
 func (f *SerializingForkFunctionRunner) Run(req FunctionRequest, w http.ResponseWriter) error {
 	start := time.Now()
 	body, err := serializeFunction(req, f)
@@ -38,7 +38,8 @@ func (f *SerializingForkFunctionRunner) Run(req FunctionRequest, w http.Response
 		done := time.Since(start)
 
 		if !strings.HasPrefix(req.UserAgent, "kube-probe") {
-			log.Printf("%s %s - %d - ContentLength: %s (%.4fs)", req.Method, req.RequestURI, http.StatusOK, units.HumanSize(float64(len(err.Error()))), done.Seconds())
+			//logger.Info("%s %s - %d - ContentLength: %s (%.4fs)", req.Method, req.RequestURI, http.StatusOK, units.HumanSize(float64(len(err.Error()))), done.Seconds())
+			logger.Info("kube-probe", "Method", req.Method, "RequestURI", req.RequestURI, "Status", http.StatusOK, "ContentLength", units.HumanSize(float64(len(err.Error()))), "cost time", done.Seconds())
 		}
 
 		return err
@@ -56,7 +57,8 @@ func (f *SerializingForkFunctionRunner) Run(req FunctionRequest, w http.Response
 	done := time.Since(start)
 
 	if !strings.HasPrefix(req.UserAgent, "kube-probe") {
-		log.Printf("%s %s - %d - ContentLength: %s (%.4fs)", req.Method, req.RequestURI, http.StatusOK, units.HumanSize(float64(bodyLen)), done.Seconds())
+		//logger.Info("%s %s - %d - ContentLength: %s (%.4fs)", req.Method, req.RequestURI, http.StatusOK, units.HumanSize(float64(bodyLen)), done.Seconds())
+		logger.Info("kube-probe", "Method", req.Method, "RequestURI", req.RequestURI, "Status", http.StatusOK, "ContentLength", units.HumanSize(float64(bodyLen)), "cost time", done.Seconds())
 	}
 
 	return err

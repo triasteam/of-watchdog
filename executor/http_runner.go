@@ -131,7 +131,7 @@ func (f *HTTPFunctionRunner) Run(req FunctionRequest, contentLength int64, r *ht
 
 	res, err := f.Client.Do(request.WithContext(reqCtx))
 	if err != nil {
-		log.Printf("Upstream HTTP request error: %s\n", err.Error())
+		logger.Info("Upstream HTTP request error", "err", err.Error())
 
 		// Error unrelated to context / deadline
 		if reqCtx.Err() == nil {
@@ -146,7 +146,7 @@ func (f *HTTPFunctionRunner) Run(req FunctionRequest, contentLength int64, r *ht
 
 		if reqCtx.Err() != nil {
 			// Error due to timeout / deadline
-			log.Printf("Upstream HTTP killed due to exec_timeout: %s\n", f.ExecTimeout)
+			logger.Info("Upstream HTTP killed due to exec_timeout", "timeout", f.ExecTimeout)
 			w.Header().Set("X-Duration-Seconds", fmt.Sprintf("%f", time.Since(startedTime).Seconds()))
 
 			w.WriteHeader(http.StatusGatewayTimeout)
@@ -180,7 +180,7 @@ func (f *HTTPFunctionRunner) Run(req FunctionRequest, contentLength int64, r *ht
 	// Exclude logging for health check probes from the kubelet which can spam
 	// log collection systems.
 	if !strings.HasPrefix(r.UserAgent(), "kube-probe") {
-		log.Printf("%s %s - %s - ContentLength: %s (%.4fs)", r.Method, r.RequestURI, res.Status, units.HumanSize(float64(res.ContentLength)), done.Seconds())
+		logger.Info("kube-probe", "Method", r.Method, "RequestURI", r.RequestURI, "Status", res.Status, "ContentLength", units.HumanSize(float64(res.ContentLength)), "cost time", done.Seconds())
 	}
 	logger.Debug("function result", "status", res.Status, "body", string(bodyBytes))
 

@@ -1,12 +1,12 @@
 package main
 
 import (
-	"log"
 	"net/http"
 	"net/url"
 	"sync/atomic"
 
 	limiter "github.com/openfaas/faas-middleware/concurrency-limiter"
+	"github.com/openfaas/of-watchdog/logger"
 )
 
 type readiness struct {
@@ -30,7 +30,7 @@ func (r *readiness) LimitMet() bool {
 }
 
 func (r *readiness) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	log.Printf("http req method,method:%v, scheme:%v, url:%v, endpoint: %v \n", req.Method, req.URL.Scheme, req.URL.Host, r.endpoint)
+	logger.Info("http req method,method:%v, scheme:%v, url:%v, endpoint: %v \n", req.Method, req.URL.Scheme, req.URL.Host, r.endpoint)
 	switch req.Method {
 	case http.MethodGet:
 		status := http.StatusOK
@@ -49,7 +49,7 @@ func (r *readiness) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 			readyReq, err := http.NewRequestWithContext(req.Context(), http.MethodGet, upstream.String(), nil)
 			if err != nil {
-				log.Printf("Error creating readiness request to: %s : %s", upstream.String(), err)
+				logger.Info("Error creating readiness request to: %s : %s", upstream.String(), err)
 				status = http.StatusInternalServerError
 				break
 			}

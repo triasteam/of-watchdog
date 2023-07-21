@@ -24,6 +24,7 @@ import (
 	limiter "github.com/openfaas/faas-middleware/concurrency-limiter"
 	"github.com/openfaas/of-watchdog/config"
 	"github.com/openfaas/of-watchdog/executor"
+	"github.com/openfaas/of-watchdog/logger"
 	"github.com/openfaas/of-watchdog/metrics"
 	"github.com/prometheus/client_golang/prometheus/testutil"
 )
@@ -80,7 +81,7 @@ func main() {
 		limit = requestLimiter
 	}
 
-	log.Printf("Watchdog mode: %s\tfprocess: %q\n", config.WatchdogMode(watchdogConfig.OperationalMode), watchdogConfig.FunctionProcess)
+	logger.Info("watch dog info", "Watchdog mode", config.WatchdogMode(watchdogConfig.OperationalMode), "fprocess", watchdogConfig.FunctionProcess)
 
 	httpMetrics := metrics.NewHttp()
 	http.HandleFunc("/", metrics.InstrumentHandler(requestHandler, httpMetrics))
@@ -108,13 +109,13 @@ func main() {
 		MaxHeaderBytes: 1 << 20, // Max header of 1MB
 	}
 
-	log.Printf("Timeouts: read: %s write: %s hard: %s health: %s\n",
-		watchdogConfig.HTTPReadTimeout,
-		watchdogConfig.HTTPWriteTimeout,
-		watchdogConfig.ExecTimeout,
-		watchdogConfig.HealthcheckInterval)
+	logger.Info("Timeouts",
+		"read", watchdogConfig.HTTPReadTimeout,
+		"write", watchdogConfig.HTTPWriteTimeout,
+		"hard", watchdogConfig.ExecTimeout,
+		"health", watchdogConfig.HealthcheckInterval)
 
-	log.Printf("Listening on port: %d\n", watchdogConfig.TCPPort)
+	logger.Info("Listening on port", "p", watchdogConfig.TCPPort)
 
 	listenUntilShutdown(s,
 		watchdogConfig.HealthcheckInterval,
@@ -127,7 +128,7 @@ func markUnhealthy() error {
 	atomic.StoreInt32(&acceptingConnections, 0)
 
 	path := filepath.Join(os.TempDir(), ".lock")
-	log.Printf("Removing lock-file : %s\n", path)
+	logger.Info("Removing lock-file", "path", path)
 	removeErr := os.Remove(path)
 	return removeErr
 }
@@ -141,16 +142,16 @@ func listenUntilShutdown(s *http.Server, healthcheckInterval time.Duration, writ
 
 		<-sig
 
-		log.Printf("SIGTERM: no new connections in %s\n", healthcheckInterval.String())
+		logger.Info("SIGTERM: no new connections in ", "healthcheckInterval", healthcheckInterval.String())
 
 		if err := markUnhealthy(); err != nil {
-			log.Printf("Unable to mark server as unhealthy: %s\n", err.Error())
+			logger.Info("Unable to mark server as unhealthy: %s\n", err.Error())
 		}
 
 		<-time.Tick(healthcheckInterval)
 
 		connections := int64(testutil.ToFloat64(httpMetrics.InFlight))
-		log.Printf("No new connections allowed, draining: %d requests\n", connections)
+		logger.Info("No new connections allowed, draining requests", "draining", connections)
 
 		// The maximum time to wait for active connections whilst shutting down is
 		// equivalent to the maximum execution time i.e. writeTimeout.
@@ -158,12 +159,12 @@ func listenUntilShutdown(s *http.Server, healthcheckInterval time.Duration, writ
 		defer cancel()
 
 		if err := s.Shutdown(ctx); err != nil {
-			log.Printf("Error in Shutdown: %v", err)
+			logger.Info("Error in Shutdown", "err", err)
 		}
 
 		connections = int64(testutil.ToFloat64(httpMetrics.InFlight))
 
-		log.Printf("Exiting. Active connections: %d\n", connections)
+		logger.Info("Exiting. Active connections", "connections", connections)
 
 		close(idleConnsClosed)
 	}()
@@ -171,7 +172,7 @@ func listenUntilShutdown(s *http.Server, healthcheckInterval time.Duration, writ
 	// Run the HTTP server in a separate go-routine.
 	go func() {
 		if err := s.ListenAndServe(); err != http.ErrServerClosed {
-			log.Printf("Error ListenAndServe: %v", err)
+			logger.Info("Error ListenAndServe", "err", err)
 			close(idleConnsClosed)
 		}
 	}()
@@ -180,10 +181,10 @@ func listenUntilShutdown(s *http.Server, healthcheckInterval time.Duration, writ
 		path, writeErr := createLockFile()
 
 		if writeErr != nil {
-			log.Panicf("Cannot write %s. To disable lock-file set env suppress_lock=true.\n Error: %s.\n", path, writeErr.Error())
+			logger.Fatal("cannot write path. To disable lock-file set env suppress_lock=true", "path", path, "err", writeErr.Error())
 		}
 	} else {
-		log.Println("Warning: \"suppress_lock\" is enabled. No automated health-checks will be in place for your function.")
+		logger.Info("Warning: \"suppress_lock\" is enabled. No automated health-checks will be in place for your function.")
 
 		atomic.StoreInt32(&acceptingConnections, 1)
 	}
@@ -214,7 +215,7 @@ func buildRequestHandler(watchdogConfig config.WatchdogConfig, prefixLogs bool) 
 // if the file could not be created.
 func createLockFile() (string, error) {
 	path := filepath.Join(os.TempDir(), ".lock")
-	log.Printf("Writing lock-file to: %s\n", path)
+	logger.Info("Writing lock-file to", "path", path)
 
 	if err := os.MkdirAll(os.TempDir(), os.ModePerm); err != nil {
 		return path, err
@@ -259,7 +260,7 @@ func makeSerializingForkRequestHandler(watchdogConfig config.WatchdogConfig, log
 		w.Header().Set("Content-Type", watchdogConfig.ContentType)
 		err := functionInvoker.Run(req, w)
 		if err != nil {
-			log.Println(err)
+			logger.Error("exception", "err", err)
 		}
 	}
 }
@@ -303,14 +304,14 @@ func makeStreamingRequestHandler(watchdogConfig config.WatchdogConfig, prefixLog
 			// already have written a header
 			done := time.Since(start)
 			if !strings.HasPrefix(req.UserAgent, "kube-probe") {
-				log.Printf("%s %s - %d - ContentLength: %s (%.4fs)", req.Method, req.RequestURI, http.StatusInternalServerError, units.HumanSize(float64(ww.Bytes())), done.Seconds())
+				logger.Info("%s %s - %d - ContentLength: %s (%.4fs)", req.Method, req.RequestURI, http.StatusInternalServerError, units.HumanSize(float64(ww.Bytes())), done.Seconds())
 				return
 			}
 		}
 
 		done := time.Since(start)
 		if !strings.HasPrefix(req.UserAgent, "kube-probe") {
-			log.Printf("%s %s - %d - ContentLength: %s (%.4fs)", req.Method, req.RequestURI, http.StatusOK, units.HumanSize(float64(ww.Bytes())), done.Seconds())
+			logger.Info("%s %s - %d - ContentLength: %s (%.4fs)", req.Method, req.RequestURI, http.StatusOK, units.HumanSize(float64(ww.Bytes())), done.Seconds())
 		}
 	}
 }
@@ -362,7 +363,7 @@ func makeHTTPRequestHandler(watchdogConfig config.WatchdogConfig, prefixLogs boo
 
 	functionInvoker.UpstreamURL = urlValue
 
-	log.Printf("Forking: %s, arguments: %s", commandName, arguments)
+	logger.Info("Forking: %s, arguments: %s", commandName, arguments)
 	functionInvoker.Start()
 
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -387,10 +388,10 @@ func makeHTTPRequestHandler(watchdogConfig config.WatchdogConfig, prefixLogs boo
 
 func makeStaticRequestHandler(watchdogConfig config.WatchdogConfig) http.HandlerFunc {
 	if watchdogConfig.StaticPath == "" {
-		log.Fatal(`For mode=static you must specify the "static_path" to serve`)
+		logger.Fatal(`For mode=static you must specify the "static_path" to serve`)
 	}
 
-	log.Printf("Serving files at: %s", watchdogConfig.StaticPath)
+	logger.Info("Serving files at: %s", watchdogConfig.StaticPath)
 	return http.FileServer(http.Dir(watchdogConfig.StaticPath)).ServeHTTP
 }
 
@@ -427,7 +428,7 @@ func printVersion() {
 		sha = GitCommit
 	}
 
-	log.Printf("Version: %v\tSHA: %v\n", BuildVersion(), sha)
+	logger.Info("version info", "Version", BuildVersion(), "SHA", sha)
 }
 
 type WriterCounter struct {

@@ -6,10 +6,10 @@ package metrics
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"time"
 
+	"github.com/openfaas/of-watchdog/logger"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
@@ -42,7 +42,7 @@ func (m *MetricsServer) Register(metricsPort int) {
 
 // Serve http traffic in go routine, non-blocking
 func (m *MetricsServer) Serve(cancel chan bool) {
-	log.Printf("Metrics listening on port: %d\n", m.port)
+	logger.Info("Metrics listening on port", "p", m.port)
 
 	go func() {
 		if err := m.s.ListenAndServe(); err != http.ErrServerClosed {
@@ -53,7 +53,7 @@ func (m *MetricsServer) Serve(cancel chan bool) {
 	go func() {
 		select {
 		case <-cancel:
-			log.Printf("metrics server shutdown\n")
+			logger.Info("metrics server shutdown\n")
 
 			m.s.Shutdown(context.Background())
 		}

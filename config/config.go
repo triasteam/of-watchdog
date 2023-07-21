@@ -6,10 +6,11 @@ package config
 import (
 	"bufio"
 	"fmt"
-	"log"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/openfaas/of-watchdog/logger"
 )
 
 // WatchdogConfig configuration for a watchdog.
@@ -173,7 +174,7 @@ func mapEnv(env []string) map[string]string {
 			value := val[sep+1:]
 			mapped[key] = value
 		} else {
-			log.Printf("Bad environment: %s" + val)
+			logger.Info("Bad environment", "val", val)
 		}
 	}
 

@@ -17,7 +17,7 @@ type StreamingFunctionRunner struct {
 	LogBufferSize int
 }
 
-// Run run a fork for each invocation
+// Run runs a fork for each invocation
 func (f *StreamingFunctionRunner) Run(req FunctionRequest) error {
 
 	var cmd *exec.Cmd

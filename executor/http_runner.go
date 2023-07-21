@@ -9,6 +9,8 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/openfaas/of-watchdog/logger"
+
 	units "github.com/docker/go-units"
 
 	"log"
@@ -90,11 +92,11 @@ func (f *HTTPFunctionRunner) Run(req FunctionRequest, contentLength int64, r *ht
 	startedTime := time.Now()
 
 	upstreamURL := f.UpstreamURL.String()
-
+	logger.Debug("upstream", "url", upstreamURL, "request uri", r.RequestURI)
 	if len(r.RequestURI) > 0 {
 		upstreamURL += r.RequestURI
 	}
-
+	logger.Info("upstream", "url", upstreamURL)
 	var body io.Reader
 	if f.BufferHTTPBody {
 		reqBody, _ := io.ReadAll(r.Body)
@@ -107,7 +109,7 @@ func (f *HTTPFunctionRunner) Run(req FunctionRequest, contentLength int64, r *ht
 	if err != nil {
 		return err
 	}
-
+	logger.Debug("request header", "header", r.Header)
 	for h := range r.Header {
 		request.Header.Set(h, r.Header.Get(h))
 	}
@@ -162,14 +164,17 @@ func (f *HTTPFunctionRunner) Run(req FunctionRequest, contentLength int64, r *ht
 	w.Header().Set("X-Duration-Seconds", fmt.Sprintf("%f", done.Seconds()))
 
 	w.WriteHeader(res.StatusCode)
+	var bodyBytes []byte
 	if res.Body != nil {
-		defer res.Body.Close()
+		defer func(Body io.ReadCloser) {
+			_ = Body.Close()
+		}(res.Body)
 
-		bodyBytes, bodyErr := io.ReadAll(res.Body)
-		if bodyErr != nil {
-			log.Println("read body err", bodyErr)
+		bodyBytes, err = io.ReadAll(res.Body)
+		if err != nil {
+			log.Println("read body err", err)
 		}
-		w.Write(bodyBytes)
+		_, _ = w.Write(bodyBytes)
 	}
 
 	// Exclude logging for health check probes from the kubelet which can spam
@@ -177,6 +182,7 @@ func (f *HTTPFunctionRunner) Run(req FunctionRequest, contentLength int64, r *ht
 	if !strings.HasPrefix(r.UserAgent(), "kube-probe") {
 		log.Printf("%s %s - %s - ContentLength: %s (%.4fs)", r.Method, r.RequestURI, res.Status, units.HumanSize(float64(res.ContentLength)), done.Seconds())
 	}
+	logger.Debug("function result", "status", res.Status, "body", string(bodyBytes))
 
 	return nil
 }

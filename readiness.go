@@ -6,6 +6,8 @@ import (
 	"net/url"
 	"sync/atomic"
 
+	"github.com/openfaas/of-watchdog/logger"
+
 	limiter "github.com/openfaas/faas-middleware/concurrency-limiter"
 )
 
@@ -30,6 +32,7 @@ func (r *readiness) LimitMet() bool {
 }
 
 func (r *readiness) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	logger.Info("http req method", "method", req.Method, "scheme", req.URL.Scheme, "url", req.URL.Host, "endpoint", r.endpoint)
 	switch req.Method {
 	case http.MethodGet:
 		status := http.StatusOK

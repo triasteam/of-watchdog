@@ -46,9 +46,9 @@ func LoadChainConfig() *Chain {
 	if err = v.Unmarshal(cfg); err != nil {
 		logger.Fatal("fail to unmarshal chain Config", "err", err)
 	}
-
+	logger.Info("successfully unmarshal chain config", "value", cfg)
 	if err = validateChainConfig(cfg); err != nil {
-		logger.Fatal("fail to unmarshal chain Config", "err", err)
+		logger.Fatal("fail to validate chain Config", "err", err)
 	}
 
 	logger.Info("successfully load to chain config", "value", cfg)

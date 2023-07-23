@@ -334,8 +334,7 @@ type FunctionRequest struct {
 }
 
 func callFunction(pub Publish, reqID string, reqRawDataMap map[string]interface{}) error {
-	//http://127.0.0.1:8081/system/function/get-pod?namespace=openfaas-fn"
-	fnUrl := fmt.Sprintf("/function/%v.openfaas-fn", reqRawDataMap["source"])
+
 	fnBodyMap := map[string]interface{}{}
 
 	if v, ok := reqRawDataMap["args"]; ok && v != nil {
@@ -358,9 +357,8 @@ func callFunction(pub Publish, reqID string, reqRawDataMap map[string]interface{
 	}
 
 	fr := FunctionRequest{
-		RequestURL: fnUrl,
-		ReqId:      reqID,
-		Body:       fnBodyMap,
+		ReqId: reqID,
+		Body:  fnBodyMap,
 	}
 	bodyBytes, err := json.Marshal(fr)
 	if err != nil {

@@ -1,23 +1,83 @@
 package config
 
 import (
+	"errors"
 	"os"
+
+	"github.com/mitchellh/mapstructure"
+
+	"github.com/spf13/viper"
 
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/openfaas/of-watchdog/logger"
 )
 
+const EnvPrefix = "CHAIN"
+
 type Chain struct {
-	Id                 int64
-	Addr               string
-	FunctionClientAddr string
-	FunctionOracleAddr string
-	KeyFilePath        string
-	KeyPassword        string
+	Id                 int64  `mapstructure:"id" json:"id"`
+	Addr               string `mapstructure:"addr" json:"addr"`
+	FunctionClientAddr string `mapstructure:"function_client_addr" json:"function_client_addr"`
+	FunctionOracleAddr string `mapstructure:"function_oracle_addr" json:"function_oracle_addr"`
+	KeyFilePath        string `mapstructure:"key_file_path" json:"key_file_path"`
+	KeyPassword        string `mapstructure:"key_password" json:"key_password"`
 }
 
 func LoadChainConfig() *Chain {
-	return &Chain{}
+	cfg := &Chain{}
+	v := viper.New()
+
+	v.SetEnvPrefix(EnvPrefix)
+	v.AutomaticEnv()
+
+	var envMap map[string]interface{}
+	err := mapstructure.Decode(cfg, &envMap)
+	if err != nil {
+		logger.Fatal("failed to load config", "err", err)
+		return nil
+	}
+
+	for k, _ := range envMap {
+		err := v.BindEnv(k)
+		if err != nil {
+			logger.Fatal("fail to bind env", "err", err)
+		}
+	}
+	if err = v.Unmarshal(cfg); err != nil {
+		logger.Fatal("fail to unmarshal chain Config", "err", err)
+	}
+
+	if err = validateChainConfig(cfg); err != nil {
+		logger.Fatal("fail to unmarshal chain Config", "err", err)
+	}
+
+	logger.Info("successfully load to chain config", "value", cfg)
+	return cfg
+}
+
+func validateChainConfig(cfg *Chain) error {
+
+	if cfg.Id == 0 {
+		return errors.New("chain id is wrong, please set the value of env chain id")
+	}
+	if cfg.Addr == "" {
+		return errors.New("not found chain addr, please set the value of env chain id")
+	}
+	if cfg.FunctionClientAddr == "" {
+		return errors.New("not found chain id, please set the value of env chain id")
+	}
+	if cfg.FunctionOracleAddr == "" {
+		return errors.New("not found chain id, please set the value of env chain id")
+	}
+	if cfg.KeyFilePath == "" {
+		return errors.New("not found chain id, please set the value of env chain id")
+	}
+
+	if cfg.KeyPassword == "" {
+		return errors.New("not found chain id, please set the value of env chain id")
+	}
+
+	return nil
 }
 
 func (c Chain) ChainID() int64 {

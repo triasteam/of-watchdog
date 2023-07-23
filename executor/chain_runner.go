@@ -88,6 +88,8 @@ func (ch ChainHandler) ExecFunction(r http.Request) ([]byte, error) {
 	}
 	defer cancel()
 
+	logger.Info("post function request", "url", r.URL)
+
 	res, err := ch.Client.Do(r.WithContext(reqCtx))
 	if err != nil {
 		logger.Info("Upstream HTTP request error", "err", err.Error())

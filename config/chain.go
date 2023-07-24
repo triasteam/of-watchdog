@@ -29,6 +29,7 @@ func LoadChainConfig() *Chain {
 
 	v.SetEnvPrefix(EnvPrefix)
 	v.AutomaticEnv()
+	logger.Debug("all configs", "v", v.AllSettings())
 
 	var envMap map[string]interface{}
 	err := mapstructure.Decode(cfg, &envMap)

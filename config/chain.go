@@ -38,6 +38,7 @@ func LoadChainConfig() *Chain {
 		return nil
 	}
 
+	logger.Fatal("env map", "v", envMap)
 	for k, _ := range envMap {
 		err := v.BindEnv(k)
 		if err != nil {

@@ -38,18 +38,13 @@ func LoadChainConfig() *Chain {
 		return nil
 	}
 
-	logger.Fatal("env map", "v", envMap)
 	for k, _ := range envMap {
 		err := v.BindEnv(k)
 		if err != nil {
 			logger.Fatal("fail to bind env", "err", err)
 		}
 	}
-	err = v.ReadInConfig()
-	if err != nil {
-		logger.Fatal("fail to read env chain Config", "err", err)
-		return nil
-	}
+
 	if err = v.Unmarshal(cfg); err != nil {
 		logger.Fatal("fail to unmarshal chain Config", "err", err)
 	}

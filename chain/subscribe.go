@@ -1,6 +1,7 @@
 package chain
 
 import (
+	"bytes"
 	"context"
 	"encoding/hex"
 	"encoding/json"
@@ -37,6 +38,7 @@ type Configure interface {
 	Key() *keystore.Key
 	FuncClientAddr() string
 	FuncOracleClientAddr() string
+	FuncName() [32]byte
 }
 
 type Subscriber struct {
@@ -213,7 +215,11 @@ func (cs *Subscriber) Receive() chan []byte {
 func (cs *Subscriber) watch() {
 
 	query := ethereum.FilterQuery{
-		Addresses: []common.Address{common.HexToAddress(cs.FuncClientAddr()), common.HexToAddress(cs.FuncOracleClientAddr())},
+		Addresses: []common.Address{
+			common.HexToAddress(cs.FuncClientAddr()),
+			common.HexToAddress(cs.FuncOracleClientAddr()),
+		},
+		Topics: [][]common.Hash{},
 	}
 	logs := make(chan types.Log)
 	var (
@@ -278,8 +284,9 @@ func (cs *Subscriber) selectEvent(vLog types.Log) (interface{}, error) {
 	var (
 		data interface{}
 	)
-
+	// TODO: subscribe topic
 	switch vLog.Topics[0].Hex() {
+
 	case RequestFulfilledSignature:
 		resp, err := cs.functionClient.ParseRequestFulfilled(vLog)
 		if err != nil {
@@ -295,6 +302,7 @@ func (cs *Subscriber) selectEvent(vLog types.Log) (interface{}, error) {
 		logger.Info("parse sent function request", "resp", sent.Id)
 		data = sent
 	case OracleRequestSignature:
+
 		sent, err := cs.oracleClient.ParseOracleRequest(vLog)
 		if err != nil {
 			return nil, err
@@ -305,8 +313,12 @@ func (cs *Subscriber) selectEvent(vLog types.Log) (interface{}, error) {
 			"requestInitiator", sent.RequestInitiator)
 
 		logger.Debug("request raw data", "hex req data", hex.EncodeToString(sent.Data))
+		nameByte := cs.FuncName()
+		if bytes.Compare(nameByte[:], sent.RequestId[:]) != 0 {
+			logger.Info("do not call function, its name is different")
+			return nil, nil
+		}
 
-		data = sent
 		reqRawDataMap, err := cbor.ParseDietCBOR(sent.Data)
 		if err != nil {
 			logger.Error("failed to decode contract request", "err", err)

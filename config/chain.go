@@ -2,6 +2,7 @@ package config
 
 import (
 	"errors"
+	"github.com/ethereum/go-ethereum/crypto"
 	"os"
 
 	"github.com/mitchellh/mapstructure"
@@ -19,6 +20,7 @@ type Chain struct {
 	Addr               string `mapstructure:"addr" json:"addr"`
 	FunctionClientAddr string `mapstructure:"function_client_addr" json:"function_client_addr"`
 	FunctionOracleAddr string `mapstructure:"function_oracle_addr" json:"function_oracle_addr"`
+	FunctionName       string `mapstructure:"function_name" json:"function_name"`
 	KeyFilePath        string `mapstructure:"key_file_path" json:"key_file_path"`
 	KeyPassword        string `mapstructure:"key_password" json:"key_password"`
 }
@@ -79,6 +81,10 @@ func validateChainConfig(cfg *Chain) error {
 		return errors.New("not found chain id, please set the value of env chain id")
 	}
 
+	if cfg.FunctionName == "" {
+		return errors.New("not found function name, please set the value of env function name")
+	}
+
 	return nil
 }
 
@@ -110,4 +116,10 @@ func (c Chain) FuncClientAddr() string {
 
 func (c Chain) FuncOracleClientAddr() string {
 	return c.FunctionOracleAddr
+}
+
+func (c Chain) FuncName() [32]byte {
+	functionNameHash := crypto.Keccak256Hash([]byte(c.FunctionName))
+	logger.Info("hash function name", "name", c.FunctionName, "hash", functionNameHash)
+	return functionNameHash
 }

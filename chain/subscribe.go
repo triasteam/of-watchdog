@@ -67,7 +67,8 @@ func NewSubscriber(cfg Configure) *Subscriber {
 		repliedChan:    make(chan *FulFilledRequest, 100),
 		cleanOnce:      sync.Once{},
 	}
-
+	logger.Info("function signature", "RequestFulfilledSignature", RequestFulfilledSignature,
+		"RequestSentSignature", RequestSentSignature, "OracleRequestSignature", OracleRequestSignature)
 	go sub.ConnectLoop()
 	go sub.FulfillRequest()
 	go sub.watch()
@@ -310,11 +311,12 @@ func (cs *Subscriber) selectEvent(vLog types.Log) (interface{}, error) {
 		logger.Info("receive request event",
 			"requestId", hex.EncodeToString(sent.RequestId[:]),
 			"requestContract", sent.RequestingContract,
-			"requestInitiator", sent.RequestInitiator)
+			"requestInitiator", sent.RequestInitiator,
+			"subscriptionId", sent.SubscriptionId, "hexSubId", hex.EncodeToString(sent.SubscriptionId[:]))
 
 		logger.Debug("request raw data", "hex req data", hex.EncodeToString(sent.Data))
 		nameByte := cs.FuncName()
-		if bytes.Compare(nameByte[:], sent.RequestId[:]) != 0 {
+		if bytes.Compare(nameByte[:], sent.SubscriptionId[:]) != 0 {
 			logger.Info("do not call function, its name is different")
 			return nil, nil
 		}
@@ -333,7 +335,7 @@ func (cs *Subscriber) selectEvent(vLog types.Log) (interface{}, error) {
 		}
 
 	default:
-		return nil, errors.Errorf("not support event, topic:%s", vLog.Topics[0].Hex())
+		return nil, errors.Errorf("not support event, topic:%s, addr: %v", vLog.Topics[0].Hex(), vLog.Address)
 	}
 	return data, nil
 }

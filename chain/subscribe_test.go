@@ -14,22 +14,23 @@ import (
 )
 
 func TestParseLog(t *testing.T) {
-	t.Skip()
+	//t.Skip()
 
 	cfg := config.Chain{
 		Id:                 12345678,
 		Addr:               "ws://127.0.0.1:9546",
-		FunctionClientAddr: "0xe98a2cBE781B4275aFd985E895E92Aea48B235C7",
-		FunctionOracleAddr: "0x4B9f0303352a80550455b8323bc9A3D9690ccbDF",
-		KeyFilePath:        "",
+		FunctionClientAddr: "0xE1A47C24c16b40bD29643Be62dEDB670EaB168BE",
+		FunctionOracleAddr: "0XD3641AFC2FDB1FE7453EF02AE45A7D81FD9D025F",
+		KeyFilePath:        "./testdata/UTC--2023-06-05T09-50-10.886531000Z--989777e983d4fccba32d857d797fdb75c27571c5",
 		KeyPassword:        "123456",
+		FunctionName:       "test1",
 	}
 	// key file path
 	sub := NewSubscriber(cfg)
 	defer sub.Clean()
-	sub.ConnectLoop()
-	go sub.watch()
-
+	//sub.ConnectLoop()
+	//go sub.watch()
+	//function signature	{"RequestFulfilledSignature": "0xf2fa06652e54791d449ab43ede930a20d3b71ed330cad4018f47ba6cc15da00a", "RequestSentSignature": "0x91f0d67c2f27abd6cfc317e120d5e80b31e97b9926b65d3887e59402fb20adfb", "OracleRequestSignature": "0x8fe1923fd8e0dc61a5bd16b4ed3ede4f2c6ee0de6f729fab847432965b138aa3"}
 	time.Sleep(time.Second * 6000)
 }
 

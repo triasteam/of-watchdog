@@ -1,16 +1,15 @@
 package config
 
 import (
+	"encoding/hex"
 	"errors"
-	"github.com/ethereum/go-ethereum/crypto"
 	"os"
 
-	"github.com/mitchellh/mapstructure"
-
-	"github.com/spf13/viper"
-
 	"github.com/ethereum/go-ethereum/accounts/keystore"
+	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/mitchellh/mapstructure"
 	"github.com/openfaas/of-watchdog/logger"
+	"github.com/spf13/viper"
 )
 
 const EnvPrefix = "CHAIN"
@@ -120,6 +119,6 @@ func (c Chain) FuncOracleClientAddr() string {
 
 func (c Chain) FuncName() [32]byte {
 	functionNameHash := crypto.Keccak256Hash([]byte(c.FunctionName))
-	logger.Info("hash function name", "name", c.FunctionName, "hash", functionNameHash)
+	logger.Info("hash function name", "name", c.FunctionName, "hash", functionNameHash, "hex", hex.EncodeToString(functionNameHash[:]))
 	return functionNameHash
 }

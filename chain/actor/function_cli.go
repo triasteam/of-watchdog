@@ -31,7 +31,7 @@ var (
 
 // FunctionClientMetaData contains all meta data concerning the FunctionClient contract.
 var FunctionClientMetaData = &bind.MetaData{
-	ABI: "[{\"inputs\":[],\"name\":\"EmptyRequestData\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"RequestIsAlreadyPending\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"SenderIsNotRegistry\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"id\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"result\",\"type\":\"bytes\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"err\",\"type\":\"bytes\"}],\"name\":\"RequestFulfilled\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"id\",\"type\":\"bytes32\"}],\"name\":\"RequestSent\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"requestId\",\"type\":\"bytes32\"},{\"internalType\":\"bytes\",\"name\":\"response\",\"type\":\"bytes\"},{\"internalType\":\"bytes\",\"name\":\"err\",\"type\":\"bytes\"}],\"name\":\"handleOracleFulfillment\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]",
+	ABI: "[{\"inputs\":[],\"name\":\"EmptyRequestData\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"RequestIsAlreadyPending\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"SenderIsNotRegistry\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"id\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"result\",\"type\":\"bytes\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"err\",\"type\":\"bytes\"}],\"name\":\"RequestFulfilled\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"id\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"node\",\"type\":\"address\"}],\"name\":\"RequestSent\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"requestId\",\"type\":\"bytes32\"},{\"internalType\":\"bytes\",\"name\":\"response\",\"type\":\"bytes\"},{\"internalType\":\"bytes\",\"name\":\"err\",\"type\":\"bytes\"}],\"name\":\"handleOracleFulfillment\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]",
 }
 
 // FunctionClientABI is the input ABI used to generate the binding from.
@@ -416,38 +416,47 @@ func (it *FunctionClientRequestSentIterator) Close() error {
 
 // FunctionClientRequestSent represents a RequestSent event raised by the FunctionClient contract.
 type FunctionClientRequestSent struct {
-	Id  [32]byte
-	Raw types.Log // Blockchain specific contextual infos
+	Id   [32]byte
+	Node common.Address
+	Raw  types.Log // Blockchain specific contextual infos
 }
 
-// FilterRequestSent is a free log retrieval operation binding the contract event 0x1131472297a800fee664d1d89cfa8f7676ff07189ecc53f80bbb5f4969099db8.
+// FilterRequestSent is a free log retrieval operation binding the contract event 0x91f0d67c2f27abd6cfc317e120d5e80b31e97b9926b65d3887e59402fb20adfb.
 //
-// Solidity: event RequestSent(bytes32 indexed id)
-func (_FunctionClient *FunctionClientFilterer) FilterRequestSent(opts *bind.FilterOpts, id [][32]byte) (*FunctionClientRequestSentIterator, error) {
+// Solidity: event RequestSent(bytes32 indexed id, address indexed node)
+func (_FunctionClient *FunctionClientFilterer) FilterRequestSent(opts *bind.FilterOpts, id [][32]byte, node []common.Address) (*FunctionClientRequestSentIterator, error) {
 
 	var idRule []interface{}
 	for _, idItem := range id {
 		idRule = append(idRule, idItem)
 	}
+	var nodeRule []interface{}
+	for _, nodeItem := range node {
+		nodeRule = append(nodeRule, nodeItem)
+	}
 
-	logs, sub, err := _FunctionClient.contract.FilterLogs(opts, "RequestSent", idRule)
+	logs, sub, err := _FunctionClient.contract.FilterLogs(opts, "RequestSent", idRule, nodeRule)
 	if err != nil {
 		return nil, err
 	}
 	return &FunctionClientRequestSentIterator{contract: _FunctionClient.contract, event: "RequestSent", logs: logs, sub: sub}, nil
 }
 
-// WatchRequestSent is a free log subscription operation binding the contract event 0x1131472297a800fee664d1d89cfa8f7676ff07189ecc53f80bbb5f4969099db8.
+// WatchRequestSent is a free log subscription operation binding the contract event 0x91f0d67c2f27abd6cfc317e120d5e80b31e97b9926b65d3887e59402fb20adfb.
 //
-// Solidity: event RequestSent(bytes32 indexed id)
-func (_FunctionClient *FunctionClientFilterer) WatchRequestSent(opts *bind.WatchOpts, sink chan<- *FunctionClientRequestSent, id [][32]byte) (event.Subscription, error) {
+// Solidity: event RequestSent(bytes32 indexed id, address indexed node)
+func (_FunctionClient *FunctionClientFilterer) WatchRequestSent(opts *bind.WatchOpts, sink chan<- *FunctionClientRequestSent, id [][32]byte, node []common.Address) (event.Subscription, error) {
 
 	var idRule []interface{}
 	for _, idItem := range id {
 		idRule = append(idRule, idItem)
 	}
+	var nodeRule []interface{}
+	for _, nodeItem := range node {
+		nodeRule = append(nodeRule, nodeItem)
+	}
 
-	logs, sub, err := _FunctionClient.contract.WatchLogs(opts, "RequestSent", idRule)
+	logs, sub, err := _FunctionClient.contract.WatchLogs(opts, "RequestSent", idRule, nodeRule)
 	if err != nil {
 		return nil, err
 	}
@@ -479,9 +488,9 @@ func (_FunctionClient *FunctionClientFilterer) WatchRequestSent(opts *bind.Watch
 	}), nil
 }
 
-// ParseRequestSent is a log parse operation binding the contract event 0x1131472297a800fee664d1d89cfa8f7676ff07189ecc53f80bbb5f4969099db8.
+// ParseRequestSent is a log parse operation binding the contract event 0x91f0d67c2f27abd6cfc317e120d5e80b31e97b9926b65d3887e59402fb20adfb.
 //
-// Solidity: event RequestSent(bytes32 indexed id)
+// Solidity: event RequestSent(bytes32 indexed id, address indexed node)
 func (_FunctionClient *FunctionClientFilterer) ParseRequestSent(log types.Log) (*FunctionClientRequestSent, error) {
 	event := new(FunctionClientRequestSent)
 	if err := _FunctionClient.contract.UnpackLog(event, "RequestSent", log); err != nil {

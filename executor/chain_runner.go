@@ -61,9 +61,13 @@ func (ch ChainHandler) Run() {
 			continue
 		}
 		reqHttp.Header.Set("requestId", reqData.ReqId)
-
+		resp, err := ch.ExecFunction(reqHttp)
+		if err != nil {
+			return
+		}
 		ret := &chain.FulFilledRequest{
 			RequestId: reqData.ReqId,
+			Resp:      resp,
 		}
 		ch.publisher.Reply(ret)
 		if ret.Err != nil {
@@ -75,7 +79,7 @@ func (ch ChainHandler) Run() {
 	}
 
 }
-func (ch ChainHandler) ExecFunction(r http.Request) ([]byte, error) {
+func (ch ChainHandler) ExecFunction(r *http.Request) ([]byte, error) {
 	startedTime := time.Now()
 	var reqCtx context.Context
 	var cancel context.CancelFunc

@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"io"
-	"log"
 	"net/http"
 	"time"
 
@@ -129,9 +128,9 @@ func (ch ChainHandler) ExecFunction(r *http.Request) ([]byte, error) {
 
 		bodyBytes, err = io.ReadAll(res.Body)
 		if err != nil {
-			log.Println("read body err", err)
+			logger.Info("read body err", "err", err)
 		}
 	}
-	logger.Info("from chain event", r.Method, "RequestURI", r.RequestURI, "Status", res.Status, "ContentLength", units.HumanSize(float64(res.ContentLength)), "cost time", done.Seconds())
-	return bodyBytes, nil
+	logger.Info("from chain event", "method", r.Method, "RequestURI", r.RequestURI, "Status", res.Status, "ContentLength", units.HumanSize(float64(res.ContentLength)), "cost time", done.Seconds())
+	return bodyBytes, err
 }

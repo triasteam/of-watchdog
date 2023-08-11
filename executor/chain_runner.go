@@ -41,6 +41,7 @@ func (ch ChainHandler) Run() {
 	for true {
 		select {
 		case dataByte := <-ch.publisher.Receive():
+
 			logger.Info("receive request data", "value", string(dataByte))
 			err := json.Unmarshal(dataByte, reqData)
 			if err != nil {
@@ -48,7 +49,7 @@ func (ch ChainHandler) Run() {
 				continue
 			}
 		}
-
+		var errRet []byte
 		marshal, err := json.Marshal(reqData.Body)
 		if err != nil {
 			logger.Error("failed to unmarshal function request body", "err", err)
@@ -63,11 +64,13 @@ func (ch ChainHandler) Run() {
 		reqHttp.Header.Set("requestId", reqData.ReqId)
 		resp, err := ch.ExecFunction(reqHttp)
 		if err != nil {
-			return
+			errRet = []byte(err.Error())
 		}
+
 		ret := &chain.FulFilledRequest{
 			RequestId: reqData.ReqId,
 			Resp:      resp,
+			Err:       errRet,
 		}
 		ch.publisher.Reply(ret)
 		if ret.Err != nil {

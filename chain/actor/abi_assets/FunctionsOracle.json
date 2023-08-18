@@ -78,7 +78,7 @@
 		"inputs": [
 			{
 				"internalType": "bytes32",
-				"name": "subscriptionId",
+				"name": "functionId",
 				"type": "bytes32"
 			},
 			{

@@ -174,6 +174,14 @@ func (cs *Subscriber) FulfillRequest() {
 					if !cs.isRenewed.Load() {
 						return errors.New("subscriber is resubscribing, isRenewed is false")
 					}
+
+					//sink := make(chan *actor.FunctionClientRequestFulfilled)
+					//defer close(sink)
+					//fulfilled, err := cs.functionClient.WatchRequestFulfilled(&bind.WatchOpts{Context: context.Background()}, sink, [][32]byte{requestId})
+					//if err != nil {
+					//	return err
+					//}
+					//defer fulfilled.Unsubscribe()
 					tx, err := cs.functionClient.HandleOracleFulfillment(&bind.TransactOpts{
 						From:   auth.From,
 						Signer: auth.Signer,
@@ -182,6 +190,16 @@ func (cs *Subscriber) FulfillRequest() {
 						logger.Error("failed to call HandleOracleFulfillment", "err", err)
 						return err
 					}
+					//var (
+					//	resp *actor.FunctionClientRequestFulfilled
+					//)
+					//select {
+					//case resp = <-sink:
+					//case err = <-fulfilled.Err():
+					//	logger.Error("failed to send resp", "err", err)
+					//	return err
+					//}
+
 					logger.Info("fulfilled request", "tx hash", tx.Hash().String())
 					return nil
 				},
@@ -291,6 +309,7 @@ func (cs *Subscriber) selectEvent(vLog types.Log) (interface{}, error) {
 	case RequestFulfilledSignature:
 		resp, err := cs.functionClient.ParseRequestFulfilled(vLog)
 		if err != nil {
+			logger.Error("failed to parse function response", "err", err)
 			return nil, err
 		}
 		logger.Info("parse function response", "resp", string(resp.Result))

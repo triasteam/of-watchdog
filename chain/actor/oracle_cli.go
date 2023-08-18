@@ -31,7 +31,7 @@ var (
 
 // FunctionOracleMetaData contains all meta data concerning the FunctionOracle contract.
 var FunctionOracleMetaData = &bind.MetaData{
-	ABI: "[{\"inputs\":[],\"name\":\"EmptyBillingRegistry\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"EmptyPublicKey\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"EmptyRequestData\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InconsistentReportData\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"UnauthorizedPublicKeyChange\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"requestId\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"requestingContract\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"requestInitiator\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"subscriptionId\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"subscriptionOwner\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"name\":\"OracleRequest\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"init\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"subscriptionId\",\"type\":\"bytes32\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"name\":\"sendRequest\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]",
+	ABI: "[{\"inputs\":[],\"name\":\"EmptyBillingRegistry\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"EmptyPublicKey\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"EmptyRequestData\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InconsistentReportData\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"UnauthorizedPublicKeyChange\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"requestId\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"requestingContract\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"requestInitiator\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"subscriptionId\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"subscriptionOwner\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"name\":\"OracleRequest\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"init\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"functionId\",\"type\":\"bytes32\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"name\":\"sendRequest\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]",
 }
 
 // FunctionOracleABI is the input ABI used to generate the binding from.
@@ -203,23 +203,23 @@ func (_FunctionOracle *FunctionOracleTransactorSession) Init() (*types.Transacti
 
 // SendRequest is a paid mutator transaction binding the contract method 0x041dae33.
 //
-// Solidity: function sendRequest(bytes32 subscriptionId, bytes data) returns(bytes32)
-func (_FunctionOracle *FunctionOracleTransactor) SendRequest(opts *bind.TransactOpts, subscriptionId [32]byte, data []byte) (*types.Transaction, error) {
-	return _FunctionOracle.contract.Transact(opts, "sendRequest", subscriptionId, data)
+// Solidity: function sendRequest(bytes32 functionId, bytes data) returns(bytes32)
+func (_FunctionOracle *FunctionOracleTransactor) SendRequest(opts *bind.TransactOpts, functionId [32]byte, data []byte) (*types.Transaction, error) {
+	return _FunctionOracle.contract.Transact(opts, "sendRequest", functionId, data)
 }
 
 // SendRequest is a paid mutator transaction binding the contract method 0x041dae33.
 //
-// Solidity: function sendRequest(bytes32 subscriptionId, bytes data) returns(bytes32)
-func (_FunctionOracle *FunctionOracleSession) SendRequest(subscriptionId [32]byte, data []byte) (*types.Transaction, error) {
-	return _FunctionOracle.Contract.SendRequest(&_FunctionOracle.TransactOpts, subscriptionId, data)
+// Solidity: function sendRequest(bytes32 functionId, bytes data) returns(bytes32)
+func (_FunctionOracle *FunctionOracleSession) SendRequest(functionId [32]byte, data []byte) (*types.Transaction, error) {
+	return _FunctionOracle.Contract.SendRequest(&_FunctionOracle.TransactOpts, functionId, data)
 }
 
 // SendRequest is a paid mutator transaction binding the contract method 0x041dae33.
 //
-// Solidity: function sendRequest(bytes32 subscriptionId, bytes data) returns(bytes32)
-func (_FunctionOracle *FunctionOracleTransactorSession) SendRequest(subscriptionId [32]byte, data []byte) (*types.Transaction, error) {
-	return _FunctionOracle.Contract.SendRequest(&_FunctionOracle.TransactOpts, subscriptionId, data)
+// Solidity: function sendRequest(bytes32 functionId, bytes data) returns(bytes32)
+func (_FunctionOracle *FunctionOracleTransactorSession) SendRequest(functionId [32]byte, data []byte) (*types.Transaction, error) {
+	return _FunctionOracle.Contract.SendRequest(&_FunctionOracle.TransactOpts, functionId, data)
 }
 
 // FunctionOracleOracleRequestIterator is returned from FilterOracleRequest and is used to iterate over the raw logs and unpacked data for OracleRequest events raised by the FunctionOracle contract.

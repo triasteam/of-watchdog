@@ -1,7 +1,6 @@
 package chain
 
 import (
-	"bytes"
 	"context"
 	"encoding/hex"
 	"encoding/json"
@@ -336,11 +335,11 @@ func (cs *Subscriber) selectEvent(vLog types.Log) (interface{}, error) {
 			"functionId", sent.FunctionId, "hexSubId", hex.EncodeToString(sent.FunctionId[:]))
 
 		logger.Debug("request raw data", "hex req data", hex.EncodeToString(sent.Data))
-		nameByte := cs.FuncName()
-		if bytes.Compare(nameByte[:], sent.FunctionId[:]) != 0 {
-			logger.Info("do not call function, its name is different")
-			return nil, nil
-		}
+		//nameByte := cs.FuncName()
+		//if bytes.Compare(nameByte[:], sent.FunctionId[:]) != 0 {
+		//	logger.Info("do not call function, its name is different")
+		//	return nil, nil
+		//}
 
 		reqRawDataMap, err := cbor.ParseDietCBOR(sent.Data)
 		if err != nil {

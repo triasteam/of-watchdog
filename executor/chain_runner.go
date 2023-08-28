@@ -18,6 +18,8 @@ import (
 type ChainHandler struct {
 	publisher            chain.Publish
 	FunctionsProviderURL string
+	WorkScoreURL         string
+	lastWorkScore        int64
 	Client               *http.Client
 	ExecTimeout          time.Duration
 }
@@ -69,6 +71,7 @@ func (ch ChainHandler) Run() {
 		ret := &chain.FulFilledRequest{
 			RequestId: reqData.ReqId,
 			Resp:      resp,
+			NodeScore: 0,
 			Err:       errRet,
 		}
 		ch.publisher.Reply(ret)
@@ -81,6 +84,30 @@ func (ch ChainHandler) Run() {
 	}
 
 }
+
+func (ch ChainHandler) GetWorkScore(funcName string) int64 {
+
+	score := ch.lastWorkScore
+	reqHttp, err := http.NewRequest(http.MethodGet, ch.WorkScoreURL, nil)
+	if err != nil {
+		logger.Error("failed to creat get worker score request", "err", err)
+		return score
+	}
+
+	q := reqHttp.URL.Query()
+	q.Add("func_name", funcName)
+	reqHttp.URL.RawQuery = q.Encode()
+
+	resp, err := ch.ExecFunction(reqHttp)
+	if err != nil {
+		logger.Error("failed to send worker score request", "err", err)
+		return score
+	}
+	ch.lastWorkScore = 1000
+	logger.Info("success to get node score", "score", string(resp))
+	return score
+}
+
 func (ch ChainHandler) ExecFunction(r *http.Request) ([]byte, error) {
 	startedTime := time.Now()
 	var reqCtx context.Context
@@ -110,7 +137,6 @@ func (ch ChainHandler) ExecFunction(r *http.Request) ([]byte, error) {
 
 		if reqCtx.Err() != nil {
 			// Error due to timeout / deadline
-
 			logger.Error("failed to exec function", "err", err, "timeout", ch.ExecTimeout)
 			return nil, errors.WithMessagef(err, "due to exec_timeout,%v", ch.ExecTimeout)
 		}
@@ -131,6 +157,6 @@ func (ch ChainHandler) ExecFunction(r *http.Request) ([]byte, error) {
 			logger.Info("read body err", "err", err)
 		}
 	}
-	logger.Info("from chain event", "method", r.Method, "RequestURI", r.RequestURI, "Status", res.Status, "ContentLength", units.HumanSize(float64(res.ContentLength)), "cost time", done.Seconds())
+	logger.Info("success to send http req", "method", r.Method, "RequestURI", r.RequestURI, "Status", res.Status, "ContentLength", units.HumanSize(float64(res.ContentLength)), "cost time", done.Seconds())
 	return bodyBytes, err
 }

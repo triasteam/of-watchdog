@@ -142,6 +142,7 @@ func (cs *Subscriber) ConnectLoop() {
 type FulFilledRequest struct {
 	RequestId string
 	Resp      []byte
+	NodeScore int64
 	Err       []byte
 }
 
@@ -175,32 +176,32 @@ func (cs *Subscriber) FulfillRequest() {
 						return errors.New("subscriber is resubscribing, isRenewed is false")
 					}
 
-					//sink := make(chan *actor.FunctionClientRequestFulfilled)
-					//defer close(sink)
-					//fulfilled, err := cs.functionClient.WatchRequestFulfilled(&bind.WatchOpts{Context: context.Background()}, sink, [][32]byte{requestId})
-					//if err != nil {
-					//	return err
-					//}
-					//defer fulfilled.Unsubscribe()
-					tx, err := cs.functionClient.HandleOracleFulfillment(&bind.TransactOpts{
-						From:   auth.From,
-						Signer: auth.Signer,
-					}, requestId, ret.Resp, ret.Err)
+					sink := make(chan *actor.FunctionOracleOracleResponse)
+					defer close(sink)
+					respSub, err := cs.oracleClient.WatchOracleResponse(&bind.WatchOpts{Context: context.Background()}, sink, [][32]byte{requestId})
 					if err != nil {
-						logger.Error("failed to call HandleOracleFulfillment", "err", err)
 						return err
 					}
-					//var (
-					//	resp *actor.FunctionClientRequestFulfilled
-					//)
-					//select {
-					//case resp = <-sink:
-					//case err = <-fulfilled.Err():
-					//	logger.Error("failed to send resp", "err", err)
-					//	return err
-					//}
+					defer respSub.Unsubscribe()
+					tx, err := cs.oracleClient.FulfillRequestByNode(&bind.TransactOpts{
+						From:   auth.From,
+						Signer: auth.Signer,
+					}, requestId, common.HexToAddress(cs.Configure.FuncOracleClientAddr()), new(big.Int).SetInt64(ret.NodeScore), ret.Resp, ret.Err)
+					if err != nil {
+						logger.Error("cannot send FulfillRequestByNode tx", "requestId", string(reqID), "err", err)
+						return errors.WithMessagef(err, "cannot send FulfillRequestByNode tx")
+					}
+					var (
+						resp *actor.FunctionOracleOracleResponse
+					)
+					select {
+					case resp = <-sink:
+					case err = <-respSub.Err():
+						logger.Error("failed to send resp", "err", err)
+						return err
+					}
 
-					logger.Info("fulfilled request", "tx hash", tx.Hash().String())
+					logger.Info("fulfilled request", "tx hash", tx.Hash().String(), "blockNumber", resp.Raw.BlockNumber, "reqId", hex.EncodeToString(resp.RequestId[:]))
 					return nil
 				},
 				retry.Attempts(5),
@@ -331,11 +332,12 @@ func (cs *Subscriber) selectEvent(vLog types.Log) (interface{}, error) {
 			"requestId", hex.EncodeToString(sent.RequestId[:]),
 			"requestContract", sent.RequestingContract,
 			"requestInitiator", sent.RequestInitiator,
-			"subscriptionId", sent.SubscriptionId, "hexSubId", hex.EncodeToString(sent.SubscriptionId[:]))
+			"from contract", sent.RequestingContract.String(),
+			"functionId", sent.FunctionId, "hexSubId", hex.EncodeToString(sent.FunctionId[:]))
 
 		logger.Debug("request raw data", "hex req data", hex.EncodeToString(sent.Data))
 		nameByte := cs.FuncName()
-		if bytes.Compare(nameByte[:], sent.SubscriptionId[:]) != 0 {
+		if bytes.Compare(nameByte[:], sent.FunctionId[:]) != 0 {
 			logger.Info("do not call function, its name is different")
 			return nil, nil
 		}

@@ -31,7 +31,7 @@ var (
 
 // FunctionOracleMetaData contains all meta data concerning the FunctionOracle contract.
 var FunctionOracleMetaData = &bind.MetaData{
-	ABI: "[{\"inputs\":[],\"name\":\"EmptyBillingRegistry\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"EmptyPublicKey\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"EmptyRequestData\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InconsistentReportData\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"UnauthorizedPublicKeyChange\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"requestId\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"requestingContract\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"requestInitiator\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"subscriptionId\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"subscriptionOwner\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"name\":\"OracleRequest\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"init\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"functionId\",\"type\":\"bytes32\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"name\":\"sendRequest\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]",
+	ABI: "[{\"inputs\":[],\"name\":\"Empty\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"EmptyBillingRegistry\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"EmptyPublicKey\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"EmptyRequestData\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InconsistentReportData\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"UnauthorizedPublicKeyChange\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"requestId\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"requestingContract\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"requestInitiator\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"functionId\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"subscriptionOwner\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"name\":\"OracleRequest\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"requestId\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"reason\",\"type\":\"string\"}],\"name\":\"OracleRequestTimeout\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"requestId\",\"type\":\"bytes32\"}],\"name\":\"OracleResponse\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"EXPIRY_TIME\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"fulfillOracleRequest\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"_requestId\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"oracleAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"score\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"resp\",\"type\":\"bytes\"},{\"internalType\":\"bytes\",\"name\":\"err\",\"type\":\"bytes\"}],\"name\":\"fulfillRequestByNode\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"init\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"respSelector\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"functionId\",\"type\":\"bytes32\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"name\":\"sendRequest\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]",
 }
 
 // FunctionOracleABI is the input ABI used to generate the binding from.
@@ -180,6 +180,110 @@ func (_FunctionOracle *FunctionOracleTransactorRaw) Transact(opts *bind.Transact
 	return _FunctionOracle.Contract.contract.Transact(opts, method, params...)
 }
 
+// EXPIRYTIME is a free data retrieval call binding the contract method 0x4b602282.
+//
+// Solidity: function EXPIRY_TIME() view returns(uint256)
+func (_FunctionOracle *FunctionOracleCaller) EXPIRYTIME(opts *bind.CallOpts) (*big.Int, error) {
+	var out []interface{}
+	err := _FunctionOracle.contract.Call(opts, &out, "EXPIRY_TIME")
+
+	if err != nil {
+		return *new(*big.Int), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
+
+	return out0, err
+
+}
+
+// EXPIRYTIME is a free data retrieval call binding the contract method 0x4b602282.
+//
+// Solidity: function EXPIRY_TIME() view returns(uint256)
+func (_FunctionOracle *FunctionOracleSession) EXPIRYTIME() (*big.Int, error) {
+	return _FunctionOracle.Contract.EXPIRYTIME(&_FunctionOracle.CallOpts)
+}
+
+// EXPIRYTIME is a free data retrieval call binding the contract method 0x4b602282.
+//
+// Solidity: function EXPIRY_TIME() view returns(uint256)
+func (_FunctionOracle *FunctionOracleCallerSession) EXPIRYTIME() (*big.Int, error) {
+	return _FunctionOracle.Contract.EXPIRYTIME(&_FunctionOracle.CallOpts)
+}
+
+// RespSelector is a free data retrieval call binding the contract method 0x26e696cf.
+//
+// Solidity: function respSelector(uint256 ) view returns(uint256)
+func (_FunctionOracle *FunctionOracleCaller) RespSelector(opts *bind.CallOpts, arg0 *big.Int) (*big.Int, error) {
+	var out []interface{}
+	err := _FunctionOracle.contract.Call(opts, &out, "respSelector", arg0)
+
+	if err != nil {
+		return *new(*big.Int), err
+	}
+
+	out0 := *abi.ConvertType(out[0], new(*big.Int)).(**big.Int)
+
+	return out0, err
+
+}
+
+// RespSelector is a free data retrieval call binding the contract method 0x26e696cf.
+//
+// Solidity: function respSelector(uint256 ) view returns(uint256)
+func (_FunctionOracle *FunctionOracleSession) RespSelector(arg0 *big.Int) (*big.Int, error) {
+	return _FunctionOracle.Contract.RespSelector(&_FunctionOracle.CallOpts, arg0)
+}
+
+// RespSelector is a free data retrieval call binding the contract method 0x26e696cf.
+//
+// Solidity: function respSelector(uint256 ) view returns(uint256)
+func (_FunctionOracle *FunctionOracleCallerSession) RespSelector(arg0 *big.Int) (*big.Int, error) {
+	return _FunctionOracle.Contract.RespSelector(&_FunctionOracle.CallOpts, arg0)
+}
+
+// FulfillOracleRequest is a paid mutator transaction binding the contract method 0x86f02842.
+//
+// Solidity: function fulfillOracleRequest() returns(bool)
+func (_FunctionOracle *FunctionOracleTransactor) FulfillOracleRequest(opts *bind.TransactOpts) (*types.Transaction, error) {
+	return _FunctionOracle.contract.Transact(opts, "fulfillOracleRequest")
+}
+
+// FulfillOracleRequest is a paid mutator transaction binding the contract method 0x86f02842.
+//
+// Solidity: function fulfillOracleRequest() returns(bool)
+func (_FunctionOracle *FunctionOracleSession) FulfillOracleRequest() (*types.Transaction, error) {
+	return _FunctionOracle.Contract.FulfillOracleRequest(&_FunctionOracle.TransactOpts)
+}
+
+// FulfillOracleRequest is a paid mutator transaction binding the contract method 0x86f02842.
+//
+// Solidity: function fulfillOracleRequest() returns(bool)
+func (_FunctionOracle *FunctionOracleTransactorSession) FulfillOracleRequest() (*types.Transaction, error) {
+	return _FunctionOracle.Contract.FulfillOracleRequest(&_FunctionOracle.TransactOpts)
+}
+
+// FulfillRequestByNode is a paid mutator transaction binding the contract method 0xc51f0db5.
+//
+// Solidity: function fulfillRequestByNode(bytes32 _requestId, address oracleAddress, uint256 score, bytes resp, bytes err) returns(bool)
+func (_FunctionOracle *FunctionOracleTransactor) FulfillRequestByNode(opts *bind.TransactOpts, _requestId [32]byte, oracleAddress common.Address, score *big.Int, resp []byte, err []byte) (*types.Transaction, error) {
+	return _FunctionOracle.contract.Transact(opts, "fulfillRequestByNode", _requestId, oracleAddress, score, resp, err)
+}
+
+// FulfillRequestByNode is a paid mutator transaction binding the contract method 0xc51f0db5.
+//
+// Solidity: function fulfillRequestByNode(bytes32 _requestId, address oracleAddress, uint256 score, bytes resp, bytes err) returns(bool)
+func (_FunctionOracle *FunctionOracleSession) FulfillRequestByNode(_requestId [32]byte, oracleAddress common.Address, score *big.Int, resp []byte, err []byte) (*types.Transaction, error) {
+	return _FunctionOracle.Contract.FulfillRequestByNode(&_FunctionOracle.TransactOpts, _requestId, oracleAddress, score, resp, err)
+}
+
+// FulfillRequestByNode is a paid mutator transaction binding the contract method 0xc51f0db5.
+//
+// Solidity: function fulfillRequestByNode(bytes32 _requestId, address oracleAddress, uint256 score, bytes resp, bytes err) returns(bool)
+func (_FunctionOracle *FunctionOracleTransactorSession) FulfillRequestByNode(_requestId [32]byte, oracleAddress common.Address, score *big.Int, resp []byte, err []byte) (*types.Transaction, error) {
+	return _FunctionOracle.Contract.FulfillRequestByNode(&_FunctionOracle.TransactOpts, _requestId, oracleAddress, score, resp, err)
+}
+
 // Init is a paid mutator transaction binding the contract method 0xe1c7392a.
 //
 // Solidity: function init() returns()
@@ -294,7 +398,7 @@ type FunctionOracleOracleRequest struct {
 	RequestId          [32]byte
 	RequestingContract common.Address
 	RequestInitiator   common.Address
-	SubscriptionId     [32]byte
+	FunctionId         [32]byte
 	SubscriptionOwner  common.Address
 	Data               []byte
 	Raw                types.Log // Blockchain specific contextual infos
@@ -302,20 +406,20 @@ type FunctionOracleOracleRequest struct {
 
 // FilterOracleRequest is a free log retrieval operation binding the contract event 0x7591d2b0b419b4e3b19a2bc688567ba54fe3e1c126aa64cff602c38fb2136f20.
 //
-// Solidity: event OracleRequest(bytes32 indexed requestId, address requestingContract, address requestInitiator, bytes32 indexed subscriptionId, address subscriptionOwner, bytes data)
-func (_FunctionOracle *FunctionOracleFilterer) FilterOracleRequest(opts *bind.FilterOpts, requestId [][32]byte, subscriptionId [][32]byte) (*FunctionOracleOracleRequestIterator, error) {
+// Solidity: event OracleRequest(bytes32 indexed requestId, address requestingContract, address requestInitiator, bytes32 indexed functionId, address subscriptionOwner, bytes data)
+func (_FunctionOracle *FunctionOracleFilterer) FilterOracleRequest(opts *bind.FilterOpts, requestId [][32]byte, functionId [][32]byte) (*FunctionOracleOracleRequestIterator, error) {
 
 	var requestIdRule []interface{}
 	for _, requestIdItem := range requestId {
 		requestIdRule = append(requestIdRule, requestIdItem)
 	}
 
-	var subscriptionIdRule []interface{}
-	for _, subscriptionIdItem := range subscriptionId {
-		subscriptionIdRule = append(subscriptionIdRule, subscriptionIdItem)
+	var functionIdRule []interface{}
+	for _, functionIdItem := range functionId {
+		functionIdRule = append(functionIdRule, functionIdItem)
 	}
 
-	logs, sub, err := _FunctionOracle.contract.FilterLogs(opts, "OracleRequest", requestIdRule, subscriptionIdRule)
+	logs, sub, err := _FunctionOracle.contract.FilterLogs(opts, "OracleRequest", requestIdRule, functionIdRule)
 	if err != nil {
 		return nil, err
 	}
@@ -324,20 +428,20 @@ func (_FunctionOracle *FunctionOracleFilterer) FilterOracleRequest(opts *bind.Fi
 
 // WatchOracleRequest is a free log subscription operation binding the contract event 0x7591d2b0b419b4e3b19a2bc688567ba54fe3e1c126aa64cff602c38fb2136f20.
 //
-// Solidity: event OracleRequest(bytes32 indexed requestId, address requestingContract, address requestInitiator, bytes32 indexed subscriptionId, address subscriptionOwner, bytes data)
-func (_FunctionOracle *FunctionOracleFilterer) WatchOracleRequest(opts *bind.WatchOpts, sink chan<- *FunctionOracleOracleRequest, requestId [][32]byte, subscriptionId [][32]byte) (event.Subscription, error) {
+// Solidity: event OracleRequest(bytes32 indexed requestId, address requestingContract, address requestInitiator, bytes32 indexed functionId, address subscriptionOwner, bytes data)
+func (_FunctionOracle *FunctionOracleFilterer) WatchOracleRequest(opts *bind.WatchOpts, sink chan<- *FunctionOracleOracleRequest, requestId [][32]byte, functionId [][32]byte) (event.Subscription, error) {
 
 	var requestIdRule []interface{}
 	for _, requestIdItem := range requestId {
 		requestIdRule = append(requestIdRule, requestIdItem)
 	}
 
-	var subscriptionIdRule []interface{}
-	for _, subscriptionIdItem := range subscriptionId {
-		subscriptionIdRule = append(subscriptionIdRule, subscriptionIdItem)
+	var functionIdRule []interface{}
+	for _, functionIdItem := range functionId {
+		functionIdRule = append(functionIdRule, functionIdItem)
 	}
 
-	logs, sub, err := _FunctionOracle.contract.WatchLogs(opts, "OracleRequest", requestIdRule, subscriptionIdRule)
+	logs, sub, err := _FunctionOracle.contract.WatchLogs(opts, "OracleRequest", requestIdRule, functionIdRule)
 	if err != nil {
 		return nil, err
 	}
@@ -371,10 +475,299 @@ func (_FunctionOracle *FunctionOracleFilterer) WatchOracleRequest(opts *bind.Wat
 
 // ParseOracleRequest is a log parse operation binding the contract event 0x7591d2b0b419b4e3b19a2bc688567ba54fe3e1c126aa64cff602c38fb2136f20.
 //
-// Solidity: event OracleRequest(bytes32 indexed requestId, address requestingContract, address requestInitiator, bytes32 indexed subscriptionId, address subscriptionOwner, bytes data)
+// Solidity: event OracleRequest(bytes32 indexed requestId, address requestingContract, address requestInitiator, bytes32 indexed functionId, address subscriptionOwner, bytes data)
 func (_FunctionOracle *FunctionOracleFilterer) ParseOracleRequest(log types.Log) (*FunctionOracleOracleRequest, error) {
 	event := new(FunctionOracleOracleRequest)
 	if err := _FunctionOracle.contract.UnpackLog(event, "OracleRequest", log); err != nil {
+		return nil, err
+	}
+	event.Raw = log
+	return event, nil
+}
+
+// FunctionOracleOracleRequestTimeoutIterator is returned from FilterOracleRequestTimeout and is used to iterate over the raw logs and unpacked data for OracleRequestTimeout events raised by the FunctionOracle contract.
+type FunctionOracleOracleRequestTimeoutIterator struct {
+	Event *FunctionOracleOracleRequestTimeout // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *FunctionOracleOracleRequestTimeoutIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(FunctionOracleOracleRequestTimeout)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(FunctionOracleOracleRequestTimeout)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *FunctionOracleOracleRequestTimeoutIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *FunctionOracleOracleRequestTimeoutIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// FunctionOracleOracleRequestTimeout represents a OracleRequestTimeout event raised by the FunctionOracle contract.
+type FunctionOracleOracleRequestTimeout struct {
+	RequestId [32]byte
+	Reason    string
+	Raw       types.Log // Blockchain specific contextual infos
+}
+
+// FilterOracleRequestTimeout is a free log retrieval operation binding the contract event 0xc9f35953b35f8685aa0905f54c1463bb78fab6f27aac7864cc3ee16b7a84fc3f.
+//
+// Solidity: event OracleRequestTimeout(bytes32 indexed requestId, string reason)
+func (_FunctionOracle *FunctionOracleFilterer) FilterOracleRequestTimeout(opts *bind.FilterOpts, requestId [][32]byte) (*FunctionOracleOracleRequestTimeoutIterator, error) {
+
+	var requestIdRule []interface{}
+	for _, requestIdItem := range requestId {
+		requestIdRule = append(requestIdRule, requestIdItem)
+	}
+
+	logs, sub, err := _FunctionOracle.contract.FilterLogs(opts, "OracleRequestTimeout", requestIdRule)
+	if err != nil {
+		return nil, err
+	}
+	return &FunctionOracleOracleRequestTimeoutIterator{contract: _FunctionOracle.contract, event: "OracleRequestTimeout", logs: logs, sub: sub}, nil
+}
+
+// WatchOracleRequestTimeout is a free log subscription operation binding the contract event 0xc9f35953b35f8685aa0905f54c1463bb78fab6f27aac7864cc3ee16b7a84fc3f.
+//
+// Solidity: event OracleRequestTimeout(bytes32 indexed requestId, string reason)
+func (_FunctionOracle *FunctionOracleFilterer) WatchOracleRequestTimeout(opts *bind.WatchOpts, sink chan<- *FunctionOracleOracleRequestTimeout, requestId [][32]byte) (event.Subscription, error) {
+
+	var requestIdRule []interface{}
+	for _, requestIdItem := range requestId {
+		requestIdRule = append(requestIdRule, requestIdItem)
+	}
+
+	logs, sub, err := _FunctionOracle.contract.WatchLogs(opts, "OracleRequestTimeout", requestIdRule)
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(FunctionOracleOracleRequestTimeout)
+				if err := _FunctionOracle.contract.UnpackLog(event, "OracleRequestTimeout", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ParseOracleRequestTimeout is a log parse operation binding the contract event 0xc9f35953b35f8685aa0905f54c1463bb78fab6f27aac7864cc3ee16b7a84fc3f.
+//
+// Solidity: event OracleRequestTimeout(bytes32 indexed requestId, string reason)
+func (_FunctionOracle *FunctionOracleFilterer) ParseOracleRequestTimeout(log types.Log) (*FunctionOracleOracleRequestTimeout, error) {
+	event := new(FunctionOracleOracleRequestTimeout)
+	if err := _FunctionOracle.contract.UnpackLog(event, "OracleRequestTimeout", log); err != nil {
+		return nil, err
+	}
+	event.Raw = log
+	return event, nil
+}
+
+// FunctionOracleOracleResponseIterator is returned from FilterOracleResponse and is used to iterate over the raw logs and unpacked data for OracleResponse events raised by the FunctionOracle contract.
+type FunctionOracleOracleResponseIterator struct {
+	Event *FunctionOracleOracleResponse // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *FunctionOracleOracleResponseIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(FunctionOracleOracleResponse)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(FunctionOracleOracleResponse)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *FunctionOracleOracleResponseIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *FunctionOracleOracleResponseIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// FunctionOracleOracleResponse represents a OracleResponse event raised by the FunctionOracle contract.
+type FunctionOracleOracleResponse struct {
+	RequestId [32]byte
+	Raw       types.Log // Blockchain specific contextual infos
+}
+
+// FilterOracleResponse is a free log retrieval operation binding the contract event 0x9e9bc7616d42c2835d05ae617e508454e63b30b934be8aa932ebc125e0e58a64.
+//
+// Solidity: event OracleResponse(bytes32 indexed requestId)
+func (_FunctionOracle *FunctionOracleFilterer) FilterOracleResponse(opts *bind.FilterOpts, requestId [][32]byte) (*FunctionOracleOracleResponseIterator, error) {
+
+	var requestIdRule []interface{}
+	for _, requestIdItem := range requestId {
+		requestIdRule = append(requestIdRule, requestIdItem)
+	}
+
+	logs, sub, err := _FunctionOracle.contract.FilterLogs(opts, "OracleResponse", requestIdRule)
+	if err != nil {
+		return nil, err
+	}
+	return &FunctionOracleOracleResponseIterator{contract: _FunctionOracle.contract, event: "OracleResponse", logs: logs, sub: sub}, nil
+}
+
+// WatchOracleResponse is a free log subscription operation binding the contract event 0x9e9bc7616d42c2835d05ae617e508454e63b30b934be8aa932ebc125e0e58a64.
+//
+// Solidity: event OracleResponse(bytes32 indexed requestId)
+func (_FunctionOracle *FunctionOracleFilterer) WatchOracleResponse(opts *bind.WatchOpts, sink chan<- *FunctionOracleOracleResponse, requestId [][32]byte) (event.Subscription, error) {
+
+	var requestIdRule []interface{}
+	for _, requestIdItem := range requestId {
+		requestIdRule = append(requestIdRule, requestIdItem)
+	}
+
+	logs, sub, err := _FunctionOracle.contract.WatchLogs(opts, "OracleResponse", requestIdRule)
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(FunctionOracleOracleResponse)
+				if err := _FunctionOracle.contract.UnpackLog(event, "OracleResponse", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ParseOracleResponse is a log parse operation binding the contract event 0x9e9bc7616d42c2835d05ae617e508454e63b30b934be8aa932ebc125e0e58a64.
+//
+// Solidity: event OracleResponse(bytes32 indexed requestId)
+func (_FunctionOracle *FunctionOracleFilterer) ParseOracleResponse(log types.Log) (*FunctionOracleOracleResponse, error) {
+	event := new(FunctionOracleOracleResponse)
+	if err := _FunctionOracle.contract.UnpackLog(event, "OracleResponse", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log

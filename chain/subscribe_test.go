@@ -50,7 +50,7 @@ func TestSubscriber_Send(t *testing.T) {
 	sink := make(chan *actor.FunctionClientRequestFulfilled)
 	defer close(sink)
 	time.Sleep(time.Second * 2)
-	sent, err := sub.functionClient.WatchRequestFulfilled(&bind.WatchOpts{Context: context.Background()}, sink, nil)
+	sent, err := sub.functionClient.WatchRequestFulfilled(&bind.WatchOpts{Context: context.Background()}, sink, [][32]byte{}, nil)
 	if err != nil {
 		return
 	}

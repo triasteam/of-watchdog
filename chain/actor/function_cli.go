@@ -31,7 +31,7 @@ var (
 
 // FunctionClientMetaData contains all meta data concerning the FunctionClient contract.
 var FunctionClientMetaData = &bind.MetaData{
-	ABI: "[{\"inputs\":[],\"name\":\"EmptyRequestData\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"RequestIsAlreadyPending\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"SenderIsNotRegistry\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"id\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"result\",\"type\":\"bytes\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"err\",\"type\":\"bytes\"}],\"name\":\"RequestFulfilled\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"id\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"node\",\"type\":\"address\"}],\"name\":\"RequestSent\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"requestId\",\"type\":\"bytes32\"},{\"internalType\":\"bytes\",\"name\":\"response\",\"type\":\"bytes\"},{\"internalType\":\"bytes\",\"name\":\"err\",\"type\":\"bytes\"}],\"name\":\"handleOracleFulfillment\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]",
+	ABI: "[{\"inputs\":[],\"name\":\"EmptyRequestData\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"RequestIsAlreadyPending\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"SenderIsNotRegistry\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"id\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"node\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"score\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"result\",\"type\":\"bytes\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"err\",\"type\":\"bytes\"}],\"name\":\"RequestFulfilled\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"id\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"functionId\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"func\",\"type\":\"address\"}],\"name\":\"RequestSent\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"requestId\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"node\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"score\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"response\",\"type\":\"bytes\"},{\"internalType\":\"bytes\",\"name\":\"err\",\"type\":\"bytes\"}],\"name\":\"handleOracleFulfillment\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]",
 }
 
 // FunctionClientABI is the input ABI used to generate the binding from.
@@ -180,25 +180,25 @@ func (_FunctionClient *FunctionClientTransactorRaw) Transact(opts *bind.Transact
 	return _FunctionClient.Contract.contract.Transact(opts, method, params...)
 }
 
-// HandleOracleFulfillment is a paid mutator transaction binding the contract method 0x0ca76175.
+// HandleOracleFulfillment is a paid mutator transaction binding the contract method 0x42ba6d28.
 //
-// Solidity: function handleOracleFulfillment(bytes32 requestId, bytes response, bytes err) returns()
-func (_FunctionClient *FunctionClientTransactor) HandleOracleFulfillment(opts *bind.TransactOpts, requestId [32]byte, response []byte, err []byte) (*types.Transaction, error) {
-	return _FunctionClient.contract.Transact(opts, "handleOracleFulfillment", requestId, response, err)
+// Solidity: function handleOracleFulfillment(bytes32 requestId, address node, uint256 score, bytes response, bytes err) returns()
+func (_FunctionClient *FunctionClientTransactor) HandleOracleFulfillment(opts *bind.TransactOpts, requestId [32]byte, node common.Address, score *big.Int, response []byte, err []byte) (*types.Transaction, error) {
+	return _FunctionClient.contract.Transact(opts, "handleOracleFulfillment", requestId, node, score, response, err)
 }
 
-// HandleOracleFulfillment is a paid mutator transaction binding the contract method 0x0ca76175.
+// HandleOracleFulfillment is a paid mutator transaction binding the contract method 0x42ba6d28.
 //
-// Solidity: function handleOracleFulfillment(bytes32 requestId, bytes response, bytes err) returns()
-func (_FunctionClient *FunctionClientSession) HandleOracleFulfillment(requestId [32]byte, response []byte, err []byte) (*types.Transaction, error) {
-	return _FunctionClient.Contract.HandleOracleFulfillment(&_FunctionClient.TransactOpts, requestId, response, err)
+// Solidity: function handleOracleFulfillment(bytes32 requestId, address node, uint256 score, bytes response, bytes err) returns()
+func (_FunctionClient *FunctionClientSession) HandleOracleFulfillment(requestId [32]byte, node common.Address, score *big.Int, response []byte, err []byte) (*types.Transaction, error) {
+	return _FunctionClient.Contract.HandleOracleFulfillment(&_FunctionClient.TransactOpts, requestId, node, score, response, err)
 }
 
-// HandleOracleFulfillment is a paid mutator transaction binding the contract method 0x0ca76175.
+// HandleOracleFulfillment is a paid mutator transaction binding the contract method 0x42ba6d28.
 //
-// Solidity: function handleOracleFulfillment(bytes32 requestId, bytes response, bytes err) returns()
-func (_FunctionClient *FunctionClientTransactorSession) HandleOracleFulfillment(requestId [32]byte, response []byte, err []byte) (*types.Transaction, error) {
-	return _FunctionClient.Contract.HandleOracleFulfillment(&_FunctionClient.TransactOpts, requestId, response, err)
+// Solidity: function handleOracleFulfillment(bytes32 requestId, address node, uint256 score, bytes response, bytes err) returns()
+func (_FunctionClient *FunctionClientTransactorSession) HandleOracleFulfillment(requestId [32]byte, node common.Address, score *big.Int, response []byte, err []byte) (*types.Transaction, error) {
+	return _FunctionClient.Contract.HandleOracleFulfillment(&_FunctionClient.TransactOpts, requestId, node, score, response, err)
 }
 
 // FunctionClientRequestFulfilledIterator is returned from FilterRequestFulfilled and is used to iterate over the raw logs and unpacked data for RequestFulfilled events raised by the FunctionClient contract.
@@ -271,39 +271,49 @@ func (it *FunctionClientRequestFulfilledIterator) Close() error {
 // FunctionClientRequestFulfilled represents a RequestFulfilled event raised by the FunctionClient contract.
 type FunctionClientRequestFulfilled struct {
 	Id     [32]byte
+	Node   common.Address
+	Score  *big.Int
 	Result []byte
 	Err    []byte
 	Raw    types.Log // Blockchain specific contextual infos
 }
 
-// FilterRequestFulfilled is a free log retrieval operation binding the contract event 0xf2fa06652e54791d449ab43ede930a20d3b71ed330cad4018f47ba6cc15da00a.
+// FilterRequestFulfilled is a free log retrieval operation binding the contract event 0xd0ceebb26e373797d34f277e1ddb02d72d53e53eb23ebeef0fcbb06191c76ea1.
 //
-// Solidity: event RequestFulfilled(bytes32 indexed id, bytes result, bytes err)
-func (_FunctionClient *FunctionClientFilterer) FilterRequestFulfilled(opts *bind.FilterOpts, id [][32]byte) (*FunctionClientRequestFulfilledIterator, error) {
+// Solidity: event RequestFulfilled(bytes32 indexed id, address indexed node, uint256 score, bytes result, bytes err)
+func (_FunctionClient *FunctionClientFilterer) FilterRequestFulfilled(opts *bind.FilterOpts, id [][32]byte, node []common.Address) (*FunctionClientRequestFulfilledIterator, error) {
 
 	var idRule []interface{}
 	for _, idItem := range id {
 		idRule = append(idRule, idItem)
 	}
+	var nodeRule []interface{}
+	for _, nodeItem := range node {
+		nodeRule = append(nodeRule, nodeItem)
+	}
 
-	logs, sub, err := _FunctionClient.contract.FilterLogs(opts, "RequestFulfilled", idRule)
+	logs, sub, err := _FunctionClient.contract.FilterLogs(opts, "RequestFulfilled", idRule, nodeRule)
 	if err != nil {
 		return nil, err
 	}
 	return &FunctionClientRequestFulfilledIterator{contract: _FunctionClient.contract, event: "RequestFulfilled", logs: logs, sub: sub}, nil
 }
 
-// WatchRequestFulfilled is a free log subscription operation binding the contract event 0xf2fa06652e54791d449ab43ede930a20d3b71ed330cad4018f47ba6cc15da00a.
+// WatchRequestFulfilled is a free log subscription operation binding the contract event 0xd0ceebb26e373797d34f277e1ddb02d72d53e53eb23ebeef0fcbb06191c76ea1.
 //
-// Solidity: event RequestFulfilled(bytes32 indexed id, bytes result, bytes err)
-func (_FunctionClient *FunctionClientFilterer) WatchRequestFulfilled(opts *bind.WatchOpts, sink chan<- *FunctionClientRequestFulfilled, id [][32]byte) (event.Subscription, error) {
+// Solidity: event RequestFulfilled(bytes32 indexed id, address indexed node, uint256 score, bytes result, bytes err)
+func (_FunctionClient *FunctionClientFilterer) WatchRequestFulfilled(opts *bind.WatchOpts, sink chan<- *FunctionClientRequestFulfilled, id [][32]byte, node []common.Address) (event.Subscription, error) {
 
 	var idRule []interface{}
 	for _, idItem := range id {
 		idRule = append(idRule, idItem)
 	}
+	var nodeRule []interface{}
+	for _, nodeItem := range node {
+		nodeRule = append(nodeRule, nodeItem)
+	}
 
-	logs, sub, err := _FunctionClient.contract.WatchLogs(opts, "RequestFulfilled", idRule)
+	logs, sub, err := _FunctionClient.contract.WatchLogs(opts, "RequestFulfilled", idRule, nodeRule)
 	if err != nil {
 		return nil, err
 	}
@@ -335,9 +345,9 @@ func (_FunctionClient *FunctionClientFilterer) WatchRequestFulfilled(opts *bind.
 	}), nil
 }
 
-// ParseRequestFulfilled is a log parse operation binding the contract event 0xf2fa06652e54791d449ab43ede930a20d3b71ed330cad4018f47ba6cc15da00a.
+// ParseRequestFulfilled is a log parse operation binding the contract event 0xd0ceebb26e373797d34f277e1ddb02d72d53e53eb23ebeef0fcbb06191c76ea1.
 //
-// Solidity: event RequestFulfilled(bytes32 indexed id, bytes result, bytes err)
+// Solidity: event RequestFulfilled(bytes32 indexed id, address indexed node, uint256 score, bytes result, bytes err)
 func (_FunctionClient *FunctionClientFilterer) ParseRequestFulfilled(log types.Log) (*FunctionClientRequestFulfilled, error) {
 	event := new(FunctionClientRequestFulfilled)
 	if err := _FunctionClient.contract.UnpackLog(event, "RequestFulfilled", log); err != nil {
@@ -416,47 +426,48 @@ func (it *FunctionClientRequestSentIterator) Close() error {
 
 // FunctionClientRequestSent represents a RequestSent event raised by the FunctionClient contract.
 type FunctionClientRequestSent struct {
-	Id   [32]byte
-	Node common.Address
-	Raw  types.Log // Blockchain specific contextual infos
+	Id         [32]byte
+	FunctionId [32]byte
+	Arg2       common.Address
+	Raw        types.Log // Blockchain specific contextual infos
 }
 
-// FilterRequestSent is a free log retrieval operation binding the contract event 0x91f0d67c2f27abd6cfc317e120d5e80b31e97b9926b65d3887e59402fb20adfb.
+// FilterRequestSent is a free log retrieval operation binding the contract event 0xf66c42a7b945272fe61591062073bc8ec78eef6116c496d08b5cf0e54b7e885f.
 //
-// Solidity: event RequestSent(bytes32 indexed id, address indexed node)
-func (_FunctionClient *FunctionClientFilterer) FilterRequestSent(opts *bind.FilterOpts, id [][32]byte, node []common.Address) (*FunctionClientRequestSentIterator, error) {
+// Solidity: event RequestSent(bytes32 indexed id, bytes32 indexed functionId, address func)
+func (_FunctionClient *FunctionClientFilterer) FilterRequestSent(opts *bind.FilterOpts, id [][32]byte, functionId [][32]byte) (*FunctionClientRequestSentIterator, error) {
 
 	var idRule []interface{}
 	for _, idItem := range id {
 		idRule = append(idRule, idItem)
 	}
-	var nodeRule []interface{}
-	for _, nodeItem := range node {
-		nodeRule = append(nodeRule, nodeItem)
+	var functionIdRule []interface{}
+	for _, functionIdItem := range functionId {
+		functionIdRule = append(functionIdRule, functionIdItem)
 	}
 
-	logs, sub, err := _FunctionClient.contract.FilterLogs(opts, "RequestSent", idRule, nodeRule)
+	logs, sub, err := _FunctionClient.contract.FilterLogs(opts, "RequestSent", idRule, functionIdRule)
 	if err != nil {
 		return nil, err
 	}
 	return &FunctionClientRequestSentIterator{contract: _FunctionClient.contract, event: "RequestSent", logs: logs, sub: sub}, nil
 }
 
-// WatchRequestSent is a free log subscription operation binding the contract event 0x91f0d67c2f27abd6cfc317e120d5e80b31e97b9926b65d3887e59402fb20adfb.
+// WatchRequestSent is a free log subscription operation binding the contract event 0xf66c42a7b945272fe61591062073bc8ec78eef6116c496d08b5cf0e54b7e885f.
 //
-// Solidity: event RequestSent(bytes32 indexed id, address indexed node)
-func (_FunctionClient *FunctionClientFilterer) WatchRequestSent(opts *bind.WatchOpts, sink chan<- *FunctionClientRequestSent, id [][32]byte, node []common.Address) (event.Subscription, error) {
+// Solidity: event RequestSent(bytes32 indexed id, bytes32 indexed functionId, address func)
+func (_FunctionClient *FunctionClientFilterer) WatchRequestSent(opts *bind.WatchOpts, sink chan<- *FunctionClientRequestSent, id [][32]byte, functionId [][32]byte) (event.Subscription, error) {
 
 	var idRule []interface{}
 	for _, idItem := range id {
 		idRule = append(idRule, idItem)
 	}
-	var nodeRule []interface{}
-	for _, nodeItem := range node {
-		nodeRule = append(nodeRule, nodeItem)
+	var functionIdRule []interface{}
+	for _, functionIdItem := range functionId {
+		functionIdRule = append(functionIdRule, functionIdItem)
 	}
 
-	logs, sub, err := _FunctionClient.contract.WatchLogs(opts, "RequestSent", idRule, nodeRule)
+	logs, sub, err := _FunctionClient.contract.WatchLogs(opts, "RequestSent", idRule, functionIdRule)
 	if err != nil {
 		return nil, err
 	}
@@ -488,9 +499,9 @@ func (_FunctionClient *FunctionClientFilterer) WatchRequestSent(opts *bind.Watch
 	}), nil
 }
 
-// ParseRequestSent is a log parse operation binding the contract event 0x91f0d67c2f27abd6cfc317e120d5e80b31e97b9926b65d3887e59402fb20adfb.
+// ParseRequestSent is a log parse operation binding the contract event 0xf66c42a7b945272fe61591062073bc8ec78eef6116c496d08b5cf0e54b7e885f.
 //
-// Solidity: event RequestSent(bytes32 indexed id, address indexed node)
+// Solidity: event RequestSent(bytes32 indexed id, bytes32 indexed functionId, address func)
 func (_FunctionClient *FunctionClientFilterer) ParseRequestSent(log types.Log) (*FunctionClientRequestSent, error) {
 	event := new(FunctionClientRequestSent)
 	if err := _FunctionClient.contract.UnpackLog(event, "RequestSent", log); err != nil {

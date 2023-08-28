@@ -83,6 +83,18 @@
 			},
 			{
 				"indexed": false,
+				"internalType": "uint256",
+				"name": "birth",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "blockTime",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
 				"internalType": "string",
 				"name": "reason",
 				"type": "string"
@@ -167,6 +179,25 @@
 			}
 		],
 		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "bytes32",
+				"name": "requestId",
+				"type": "bytes32"
+			}
+		],
+		"name": "getReq",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
 		"type": "function"
 	},
 	{

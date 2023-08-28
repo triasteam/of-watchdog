@@ -6,10 +6,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/openfaas/of-watchdog/config"
-
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/openfaas/of-watchdog/chain/actor"
+
+	"github.com/openfaas/of-watchdog/config"
+
 	"github.com/openfaas/of-watchdog/logger"
 )
 
@@ -19,8 +20,8 @@ func TestParseLog(t *testing.T) {
 	cfg := config.Chain{
 		Id:                 12345678,
 		Addr:               "ws://127.0.0.1:9546",
-		FunctionClientAddr: "0xE1A47C24c16b40bD29643Be62dEDB670EaB168BE",
-		FunctionOracleAddr: "0XD3641AFC2FDB1FE7453EF02AE45A7D81FD9D025F",
+		FunctionClientAddr: "0x06F33468612132e01f80733b0C338325bFe20C31",
+		FunctionOracleAddr: "0xd9e1F09F16b4E4DcA1dA0fd5d7088453Ec2591eD",
 		KeyFilePath:        "./testdata/UTC--2023-06-05T09-50-10.886531000Z--989777e983d4fccba32d857d797fdb75c27571c5",
 		KeyPassword:        "123456",
 		FunctionName:       "test1",

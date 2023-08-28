@@ -13,6 +13,14 @@ var (
 	OracleResponse          = []byte("OracleResponse(bytes32)")
 	OracleResponseSignature = crypto.Keccak256Hash(OracleResponse).Hex()
 
-	OracleRequestTimeout          = []byte("OracleRequestTimeout(bytes32,string)")
+	OracleRequestTimeout          = []byte("OracleRequestTimeout(bytes32,uint256,uint256,string)")
 	OracleRequestTimeoutSignature = crypto.Keccak256Hash(OracleRequestTimeout).Hex()
 )
+
+var signaturesMap = map[string]string{
+	"RequestSentSignature":          RequestSentSignature,
+	"RequestFulfilledSignature":     RequestFulfilledSignature,
+	"OracleRequestSignature":        OracleRequestSignature,
+	"OracleResponseSignature":       OracleResponseSignature,
+	"OracleRequestTimeoutSignature": OracleRequestTimeoutSignature,
+}

@@ -66,8 +66,7 @@ func NewSubscriber(cfg Configure) *Subscriber {
 		repliedChan:    make(chan *FulFilledRequest, 100),
 		cleanOnce:      sync.Once{},
 	}
-	logger.Info("function signature", "RequestFulfilledSignature", RequestFulfilledSignature,
-		"RequestSentSignature", RequestSentSignature, "OracleRequestSignature", OracleRequestSignature)
+	logger.Info("function signature", "value", signaturesMap)
 	go sub.ConnectLoop()
 	go sub.FulfillRequest()
 	go sub.watch()
@@ -201,6 +200,7 @@ func (cs *Subscriber) FulfillRequest() {
 					}
 
 					logger.Info("fulfilled request", "tx hash", tx.Hash().String(), "blockNumber", resp.Raw.BlockNumber, "reqId", hex.EncodeToString(resp.RequestId[:]))
+					logger.Info("fulfilled request", "tx hash", tx.Hash().String())
 					return nil
 				},
 				retry.Attempts(5),
@@ -305,7 +305,23 @@ func (cs *Subscriber) selectEvent(vLog types.Log) (interface{}, error) {
 	)
 	// TODO: subscribe topic
 	switch vLog.Topics[0].Hex() {
+	case OracleResponseSignature:
+		resp, err := cs.oracleClient.ParseOracleResponse(vLog)
+		if err != nil {
+			logger.Error("failed to parse function response", "err", err)
+			return nil, err
+		}
+		logger.Info("parse function response", "resp", resp)
+		data = resp
+	case OracleRequestTimeoutSignature:
 
+		resp, err := cs.oracleClient.ParseOracleRequestTimeout(vLog)
+		if err != nil {
+			logger.Error("failed to parse request timeout event", "err", err)
+			return nil, err
+		}
+		logger.Info("request timeout", "resp", resp)
+		data = resp
 	case RequestFulfilledSignature:
 		resp, err := cs.functionClient.ParseRequestFulfilled(vLog)
 		if err != nil {
@@ -332,14 +348,10 @@ func (cs *Subscriber) selectEvent(vLog types.Log) (interface{}, error) {
 			"requestContract", sent.RequestingContract,
 			"requestInitiator", sent.RequestInitiator,
 			"from contract", sent.RequestingContract.String(),
-			"functionId", sent.FunctionId, "hexSubId", hex.EncodeToString(sent.FunctionId[:]))
+			"functionId", hex.EncodeToString(sent.FunctionId[:]),
+		)
 
 		logger.Debug("request raw data", "hex req data", hex.EncodeToString(sent.Data))
-		//nameByte := cs.FuncName()
-		//if bytes.Compare(nameByte[:], sent.FunctionId[:]) != 0 {
-		//	logger.Info("do not call function, its name is different")
-		//	return nil, nil
-		//}
 
 		reqRawDataMap, err := cbor.ParseDietCBOR(sent.Data)
 		if err != nil {

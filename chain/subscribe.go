@@ -304,6 +304,7 @@ func (cs *Subscriber) selectEvent(vLog types.Log) (interface{}, error) {
 	var (
 		data interface{}
 	)
+	logger.Info("log topic", "value", vLog.Topics[0].Hex())
 	// TODO: subscribe topic
 	switch vLog.Topics[0].Hex() {
 	case OracleResponseSignature:
@@ -339,6 +340,7 @@ func (cs *Subscriber) selectEvent(vLog types.Log) (interface{}, error) {
 	case RequestSentSignature:
 		sent, err := cs.functionClient.ParseRequestSent(vLog)
 		if err != nil {
+			logger.Error("failed to parse RequestSent event", "err", err)
 			return nil, err
 		}
 		logger.Info("received RequestSent event", "log", sent.Id)
@@ -347,6 +349,7 @@ func (cs *Subscriber) selectEvent(vLog types.Log) (interface{}, error) {
 
 		sent, err := cs.oracleClient.ParseOracleRequest(vLog)
 		if err != nil {
+			logger.Error("failed to parse OracleRequest event", "err", err)
 			return nil, err
 		}
 		logger.Info("receive OracleRequest event",

@@ -38,6 +38,7 @@ type Configure interface {
 	FuncClientAddr() string
 	FuncOracleClientAddr() string
 	FuncName() [32]byte
+	VerifierScoreAddr() string
 }
 
 type Subscriber struct {
@@ -367,7 +368,7 @@ func (cs *Subscriber) selectEvent(vLog types.Log) (interface{}, error) {
 		}
 
 	default:
-		return nil, errors.Errorf("not support event, topic:%s, addr: %v", vLog.Topics[0].Hex(), vLog.Address)
+		return nil, errors.Errorf("not listen to the event, topic:%s, addr: %v", vLog.Topics[0].Hex(), vLog.Address)
 	}
 	return data, nil
 }

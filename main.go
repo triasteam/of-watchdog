@@ -98,9 +98,10 @@ func main() {
 
 	go metricsServer.Serve(cancel)
 
-	publisher := chain.NewSubscriber(config.LoadChainConfig())
+	chainConfig := config.LoadChainConfig()
+	publisher := chain.NewSubscriber(chainConfig)
 	defer publisher.Clean()
-	chainHandler := executor.NewChainHandler(publisher, watchdogConfig.UpstreamURL, watchdogConfig.ExecTimeout)
+	chainHandler := executor.NewChainHandler(publisher, chainConfig.VerifierScoreAddr(), watchdogConfig.UpstreamURL, watchdogConfig.ExecTimeout)
 	go chainHandler.Run()
 
 	s := &http.Server{

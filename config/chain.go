@@ -3,6 +3,7 @@ package config
 import (
 	"encoding/hex"
 	"errors"
+	"net/url"
 	"os"
 
 	"github.com/ethereum/go-ethereum/accounts/keystore"
@@ -19,6 +20,7 @@ type Chain struct {
 	Addr               string `mapstructure:"addr" json:"addr"`
 	FunctionClientAddr string `mapstructure:"function_client_addr" json:"function_client_addr"`
 	FunctionOracleAddr string `mapstructure:"function_oracle_addr" json:"function_oracle_addr"`
+	VerifierScoreUrl   string `mapstructure:"verifier_score_url" json:"verifier_score_url"`
 	FunctionName       string `mapstructure:"function_name" json:"function_name"`
 	KeyFilePath        string `mapstructure:"key_file_path" json:"key_file_path"`
 	KeyPassword        string `mapstructure:"key_password" json:"key_password"`
@@ -121,4 +123,13 @@ func (c Chain) FuncName() [32]byte {
 	functionNameHash := crypto.Keccak256Hash([]byte(c.FunctionName))
 	logger.Info("hash function name", "name", c.FunctionName, "hash", functionNameHash, "hex", hex.EncodeToString(functionNameHash[:]))
 	return functionNameHash
+}
+
+func (c Chain) VerifierScoreAddr() string {
+	_, err := url.Parse(c.VerifierScoreUrl)
+	if err != nil {
+		logger.Fatal("invalid VerifierScoreUrl", "raw", c.VerifierScoreUrl)
+		return ""
+	}
+	return c.VerifierScoreUrl
 }

@@ -18,7 +18,7 @@ import (
 type ChainHandler struct {
 	publisher            chain.Publish
 	FunctionsProviderURL string
-	WorkScoreURL         string
+	LocalVerifierAddress string
 	lastWorkScore        int64
 	Client               *http.Client
 	ExecTimeout          time.Duration
@@ -26,12 +26,14 @@ type ChainHandler struct {
 
 func NewChainHandler(
 	publisher chain.Publish,
+	LocalVerifierAddress string,
 	FunctionsProviderURL string,
 	timeout time.Duration,
 ) *ChainHandler {
 	return &ChainHandler{
 		publisher:            publisher,
 		FunctionsProviderURL: FunctionsProviderURL,
+		LocalVerifierAddress: LocalVerifierAddress,
 		Client:               makeProxyClient(timeout),
 		ExecTimeout:          timeout,
 	}
@@ -71,7 +73,7 @@ func (ch ChainHandler) Run() {
 		ret := &chain.FulFilledRequest{
 			RequestId: reqData.ReqId,
 			Resp:      resp,
-			NodeScore: 0,
+			NodeScore: ch.GetLocalWorkScore(),
 			Err:       errRet,
 		}
 		ch.publisher.Reply(ret)
@@ -85,26 +87,36 @@ func (ch ChainHandler) Run() {
 
 }
 
-func (ch ChainHandler) GetWorkScore(funcName string) int64 {
+func (ch ChainHandler) GetLocalWorkScore() int64 {
 
-	score := ch.lastWorkScore
-	reqHttp, err := http.NewRequest(http.MethodGet, ch.WorkScoreURL, nil)
-	if err != nil {
-		logger.Error("failed to creat get worker score request", "err", err)
-		return score
+	type VerifierResp struct {
+		Data struct {
+			Score int `json:"score"`
+			Seek  int `json:"seek"`
+		} `json:"data"`
+		Msg string `json:"msg"`
 	}
 
-	q := reqHttp.URL.Query()
-	q.Add("func_name", funcName)
-	reqHttp.URL.RawQuery = q.Encode()
+	score := ch.lastWorkScore
+	reqHttp, err := http.NewRequest(http.MethodGet, ch.LocalVerifierAddress, nil)
+	if err != nil {
+		logger.Error("failed to creat get worker score request, so score is equal to 0 or last score", "score", score, "err", err)
+		return score
+	}
 
 	resp, err := ch.ExecFunction(reqHttp)
 	if err != nil {
-		logger.Error("failed to send worker score request", "err", err)
+		logger.Error("failed to send worker score request, so score is equal to 0 or last score", "score", score, "err", err)
 		return score
 	}
-	ch.lastWorkScore = 1000
-	logger.Info("success to get node score", "score", string(resp))
+	ret := VerifierResp{}
+	err = json.Unmarshal(resp, &ret)
+	if err != nil {
+		logger.Error("failed to unmarshal worker score response, so score is equal to 0 or last score", "score", score, "err", err)
+		return score
+	}
+	logger.Info("success to get node score", "verifier resp", ret)
+	ch.lastWorkScore = int64(ret.Data.Score)
 	return score
 }
 

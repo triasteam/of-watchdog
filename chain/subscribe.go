@@ -47,10 +47,10 @@ type Subscriber struct {
 	functionClient *actor.FunctionClient
 	oracleClient   *actor.FunctionOracle
 
-	renewChan   chan struct{}
-	dailEthDone chan struct{}
+	renewChan   chan struct{} //notify for reconnecting to bsc node
+	dailEthDone chan struct{} // write dailEthDone after connecting to bsc node
 	cleanOnce   sync.Once
-	isRenewed   atomic.Bool
+	isRenewed   atomic.Bool // set isRenewed to true when to receive error from bsc subscriber, then notify to reconnect to eth
 
 	publishChannel chan []byte
 	repliedChan    chan *FulFilledRequest

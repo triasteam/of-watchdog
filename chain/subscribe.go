@@ -312,7 +312,7 @@ func (cs *Subscriber) selectEvent(vLog types.Log) (interface{}, error) {
 			logger.Error("failed to parse function response", "err", err)
 			return nil, err
 		}
-		logger.Info("parse function response", "resp", resp)
+		logger.Info("received OracleResponse event", "log", resp)
 		data = resp
 	case OracleRequestTimeoutSignature:
 
@@ -321,7 +321,7 @@ func (cs *Subscriber) selectEvent(vLog types.Log) (interface{}, error) {
 			logger.Error("failed to parse request timeout event", "err", err)
 			return nil, err
 		}
-		logger.Info("request timeout", "resp", resp)
+		logger.Info("received OracleRequestTimeout event", "log", resp)
 		data = resp
 	case RequestFulfilledSignature:
 		resp, err := cs.functionClient.ParseRequestFulfilled(vLog)
@@ -329,14 +329,19 @@ func (cs *Subscriber) selectEvent(vLog types.Log) (interface{}, error) {
 			logger.Error("failed to parse function response", "err", err)
 			return nil, err
 		}
-		logger.Info("parse function response", "resp", string(resp.Result))
+		logger.Info("received RequestFulfilled event",
+			"reqId", hex.EncodeToString(resp.Id[:]),
+			"scr node", resp.Node,
+			"resp", string(resp.Result),
+			"err", string(resp.Err),
+		)
 		data = resp
 	case RequestSentSignature:
 		sent, err := cs.functionClient.ParseRequestSent(vLog)
 		if err != nil {
 			return nil, err
 		}
-		logger.Info("parse sent function request", "resp", sent.Id)
+		logger.Info("received RequestSent event", "log", sent.Id)
 		data = sent
 	case OracleRequestSignature:
 
@@ -344,7 +349,7 @@ func (cs *Subscriber) selectEvent(vLog types.Log) (interface{}, error) {
 		if err != nil {
 			return nil, err
 		}
-		logger.Info("receive request event",
+		logger.Info("receive OracleRequest event",
 			"requestId", hex.EncodeToString(sent.RequestId[:]),
 			"requestContract", sent.RequestingContract,
 			"requestInitiator", sent.RequestInitiator,

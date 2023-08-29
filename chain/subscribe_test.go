@@ -20,8 +20,8 @@ func TestParseLog(t *testing.T) {
 	cfg := config.Chain{
 		Id:                 12345678,
 		Addr:               "ws://127.0.0.1:9546",
-		FunctionClientAddr: "0x699B04Cf6C3fEBC7e19d62795dbF2AFAf2B9Effa",
-		FunctionOracleAddr: "0xee60ee2A1C9FF75D56f06c167B00c622042Df85f",
+		FunctionClientAddr: "0x18306eF4d08c69F5768f0af53D4Bc20C25c6Ad75",
+		FunctionOracleAddr: "0x0000000000000000000000000000000000002004",
 		KeyFilePath:        "./testdata/UTC--2023-06-05T09-50-10.886531000Z--989777e983d4fccba32d857d797fdb75c27571c5",
 		KeyPassword:        "123456",
 		FunctionName:       "test1",

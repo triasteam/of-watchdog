@@ -201,8 +201,8 @@ func (cs *Subscriber) FulfillRequest() {
 						return err
 					}
 
-					logger.Info("fulfilled request", "tx hash", tx.Hash().String(), "blockNumber", resp.Raw.BlockNumber, "reqId", hex.EncodeToString(resp.RequestId[:]))
-					logger.Info("fulfilled request", "tx hash", tx.Hash().String())
+					logger.Info("node fulfilled request", "tx hash", tx.Hash().String(), "blockNumber", resp.Raw.BlockNumber, "reqId", hex.EncodeToString(resp.RequestId[:]))
+					logger.Info("node fulfilled request", "tx hash", tx.Hash().String())
 					return nil
 				},
 				retry.Attempts(5),
@@ -332,6 +332,7 @@ func (cs *Subscriber) selectEvent(vLog types.Log) (interface{}, error) {
 		logger.Info("received RequestFulfilled event",
 			"reqId", hex.EncodeToString(resp.Id[:]),
 			"scr node", resp.Node,
+			"score", resp.Score,
 			"resp", string(resp.Result),
 			"err", string(resp.Err),
 		)

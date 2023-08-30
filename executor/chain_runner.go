@@ -97,27 +97,26 @@ func (ch ChainHandler) GetLocalWorkScore() int64 {
 		Msg string `json:"msg"`
 	}
 
-	score := ch.lastWorkScore
 	reqHttp, err := http.NewRequest(http.MethodGet, ch.LocalVerifierAddress, nil)
 	if err != nil {
-		logger.Error("failed to creat get worker score request, so score is equal to 0 or last score", "score", score, "err", err)
-		return score
+		logger.Error("failed to creat get worker score request, so score is equal to 0 or last score", "score", ch.lastWorkScore, "err", err)
+		return ch.lastWorkScore
 	}
 
 	resp, err := ch.ExecFunction(reqHttp)
 	if err != nil {
-		logger.Error("failed to send worker score request, so score is equal to 0 or last score", "score", score, "err", err)
-		return score
+		logger.Error("failed to send worker score request, so score is equal to 0 or last score", "score", ch.lastWorkScore, "err", err)
+		return ch.lastWorkScore
 	}
 	ret := VerifierResp{}
 	err = json.Unmarshal(resp, &ret)
 	if err != nil {
-		logger.Error("failed to unmarshal worker score response, so score is equal to 0 or last score", "score", score, "err", err)
-		return score
+		logger.Error("failed to unmarshal worker score response, so score is equal to 0 or last score", "score", ch.lastWorkScore, "err", err)
+		return ch.lastWorkScore
 	}
 	logger.Info("success to get node score", "verifier resp", ret)
 	ch.lastWorkScore = int64(ret.Data.Score)
-	return score
+	return ch.lastWorkScore
 }
 
 func (ch ChainHandler) ExecFunction(r *http.Request) ([]byte, error) {

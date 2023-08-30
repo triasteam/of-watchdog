@@ -195,6 +195,7 @@ func (cs *Subscriber) FulfillRequest() {
 					)
 					select {
 					case resp = <-sink:
+						logger.Info("received OracleResponse event after FulfillRequestByNode", "log", resp)
 					case err = <-respSub.Err():
 						logger.Error("failed to send resp", "err", err)
 						return err
@@ -304,7 +305,6 @@ func (cs *Subscriber) selectEvent(vLog types.Log) (interface{}, error) {
 		data interface{}
 	)
 	logger.Info("log topic", "value", vLog.Topics[0].Hex())
-	// TODO: subscribe topic
 	switch vLog.Topics[0].Hex() {
 	case OracleResponseSignature:
 		resp, err := cs.oracleClient.ParseOracleResponse(vLog)

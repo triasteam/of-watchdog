@@ -3,6 +3,7 @@ package config
 import (
 	"encoding/hex"
 	"errors"
+	"fmt"
 	"net/url"
 	"os"
 
@@ -63,23 +64,23 @@ func LoadChainConfig() *Chain {
 func validateChainConfig(cfg *Chain) error {
 
 	if cfg.Id == 0 {
-		return errors.New("chain id is wrong, please set the value of env chain id")
+		return errors.New("chain id is wrong, please set the value of env CHAIN_ID")
 	}
 	if cfg.Addr == "" {
-		return errors.New("not found chain addr, please set the value of env chain id")
+		return errors.New("not found chain addr, please set the value of env CHAIN_ADDR")
 	}
 	if cfg.FunctionClientAddr == "" {
-		return errors.New("not found chain id, please set the value of env chain id")
+		return errors.New("not found FunctionClientAddr, please set the value of env CHAIN_FUNCTION_CLIENT_ADDR")
 	}
 	if cfg.FunctionOracleAddr == "" {
-		return errors.New("not found chain id, please set the value of env chain id")
+		return errors.New("not found FunctionOracleAddr, please set the value of env CHAIN_FUNCTION_ORACLE_ADDR")
 	}
 	if cfg.KeyFilePath == "" {
-		return errors.New("not found chain id, please set the value of env chain id")
+		return errors.New("not found KeyFilePath, please set the value of env CHAIN_KEY_FILE_PATH")
 	}
 
 	if cfg.KeyPassword == "" {
-		return errors.New("not found chain id, please set the value of env chain id")
+		return errors.New("not found chain id, please set the value of env CHAIN_KEY_PASSWORD")
 	}
 
 	if cfg.FunctionName == "" {
@@ -132,4 +133,22 @@ func (c Chain) VerifierScoreAddr() string {
 		return ""
 	}
 	return c.VerifierScoreUrl
+}
+
+func SetEnv(
+	id int64,
+	addr, functionClientAddr, functionOracleAddr,
+	verifierScoreUrl, functionName,
+	keyFilePath, keyPassword string,
+) {
+
+	_ = os.Setenv("CHAIN_ID", fmt.Sprintf("%d", id))
+	_ = os.Setenv("CHAIN_ADDR", addr)
+	_ = os.Setenv("CHAIN_FUNCTION_CLIENT_ADDR", functionClientAddr)
+	_ = os.Setenv("CHAIN_FUNCTION_ORACLE_ADDR", functionOracleAddr)
+	_ = os.Setenv("CHAIN_VERIFIER_SCORE_URL", verifierScoreUrl)
+	_ = os.Setenv("CHAIN_FUNCTION_NAME", functionName)
+	_ = os.Setenv("CHAIN_KEY_FILE_PATH", keyFilePath)
+	_ = os.Setenv("CHAIN_KEY_PASSWORD", keyPassword)
+
 }

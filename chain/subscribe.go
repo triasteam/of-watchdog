@@ -291,7 +291,6 @@ func (cs *Subscriber) watch() {
 		case vLog := <-logs:
 			data, err := cs.selectEvent(vLog)
 			if err != nil {
-				logger.Error(err.Error())
 				continue
 			}
 			logger.Info("watched event successfully", "data", data)

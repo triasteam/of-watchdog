@@ -31,7 +31,7 @@ var (
 
 // FunctionClientMetaData contains all meta data concerning the FunctionClient contract.
 var FunctionClientMetaData = &bind.MetaData{
-	ABI: "[{\"inputs\":[],\"name\":\"EmptyRequestData\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"RequestIsAlreadyPending\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"SenderIsNotRegistry\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"id\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"node\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"score\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"result\",\"type\":\"bytes\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"err\",\"type\":\"bytes\"}],\"name\":\"RequestFulfilled\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"id\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"functionId\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"func\",\"type\":\"address\"}],\"name\":\"RequestSent\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"requestId\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"node\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"score\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"response\",\"type\":\"bytes\"},{\"internalType\":\"bytes\",\"name\":\"err\",\"type\":\"bytes\"}],\"name\":\"handleOracleFulfillment\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"oracle\",\"type\":\"address\"}],\"name\":\"setOracle\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]",
+	ABI: "[{\"inputs\":[],\"name\":\"EmptyRequestData\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"RequestIsAlreadyPending\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"SenderIsNotRegistry\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"id\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"node\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"score\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"result\",\"type\":\"bytes\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"err\",\"type\":\"bytes\"}],\"name\":\"RequestFulfilled\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"id\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"functionId\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"funcWorker\",\"type\":\"address\"}],\"name\":\"RequestSent\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"requestId\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"node\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"score\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"response\",\"type\":\"bytes\"},{\"internalType\":\"bytes\",\"name\":\"err\",\"type\":\"bytes\"}],\"name\":\"handleOracleFulfillment\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"oracle\",\"type\":\"address\"}],\"name\":\"setOracle\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]",
 }
 
 // FunctionClientABI is the input ABI used to generate the binding from.
@@ -449,13 +449,13 @@ func (it *FunctionClientRequestSentIterator) Close() error {
 type FunctionClientRequestSent struct {
 	Id         [32]byte
 	FunctionId [32]byte
-	Arg2       common.Address
+	FuncWorker common.Address
 	Raw        types.Log // Blockchain specific contextual infos
 }
 
 // FilterRequestSent is a free log retrieval operation binding the contract event 0xf66c42a7b945272fe61591062073bc8ec78eef6116c496d08b5cf0e54b7e885f.
 //
-// Solidity: event RequestSent(bytes32 indexed id, bytes32 indexed functionId, address func)
+// Solidity: event RequestSent(bytes32 indexed id, bytes32 indexed functionId, address funcWorker)
 func (_FunctionClient *FunctionClientFilterer) FilterRequestSent(opts *bind.FilterOpts, id [][32]byte, functionId [][32]byte) (*FunctionClientRequestSentIterator, error) {
 
 	var idRule []interface{}
@@ -476,7 +476,7 @@ func (_FunctionClient *FunctionClientFilterer) FilterRequestSent(opts *bind.Filt
 
 // WatchRequestSent is a free log subscription operation binding the contract event 0xf66c42a7b945272fe61591062073bc8ec78eef6116c496d08b5cf0e54b7e885f.
 //
-// Solidity: event RequestSent(bytes32 indexed id, bytes32 indexed functionId, address func)
+// Solidity: event RequestSent(bytes32 indexed id, bytes32 indexed functionId, address funcWorker)
 func (_FunctionClient *FunctionClientFilterer) WatchRequestSent(opts *bind.WatchOpts, sink chan<- *FunctionClientRequestSent, id [][32]byte, functionId [][32]byte) (event.Subscription, error) {
 
 	var idRule []interface{}
@@ -522,7 +522,7 @@ func (_FunctionClient *FunctionClientFilterer) WatchRequestSent(opts *bind.Watch
 
 // ParseRequestSent is a log parse operation binding the contract event 0xf66c42a7b945272fe61591062073bc8ec78eef6116c496d08b5cf0e54b7e885f.
 //
-// Solidity: event RequestSent(bytes32 indexed id, bytes32 indexed functionId, address func)
+// Solidity: event RequestSent(bytes32 indexed id, bytes32 indexed functionId, address funcWorker)
 func (_FunctionClient *FunctionClientFilterer) ParseRequestSent(log types.Log) (*FunctionClientRequestSent, error) {
 	event := new(FunctionClientRequestSent)
 	if err := _FunctionClient.contract.UnpackLog(event, "RequestSent", log); err != nil {

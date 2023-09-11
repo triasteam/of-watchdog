@@ -4,14 +4,16 @@ import (
 	"context"
 	"encoding/hex"
 	"fmt"
+	"math/big"
 	"testing"
 	"time"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/ethclient"
+
 	"github.com/openfaas/of-watchdog/chain/actor"
-
 	"github.com/openfaas/of-watchdog/config"
-
 	"github.com/openfaas/of-watchdog/logger"
 )
 
@@ -21,7 +23,7 @@ func TestParseLog(t *testing.T) {
 	cfg := config.Chain{
 		Id:                 12345678,
 		Addr:               "ws://127.0.0.1:9546",
-		FunctionClientAddr: "0x18306eF4d08c69F5768f0af53D4Bc20C25c6Ad75",
+		FunctionClientAddr: "0xE8935Af625542fc62A866784F5f490636d9dbC66",
 		FunctionOracleAddr: "0x0000000000000000000000000000000000002004",
 		KeyFilePath:        "./testdata/UTC--2023-06-05T09-50-10.886531000Z--989777e983d4fccba32d857d797fdb75c27571c5",
 		KeyPassword:        "123456",
@@ -37,12 +39,65 @@ func TestParseLog(t *testing.T) {
 }
 
 func TestInteractor_FulfillRequest(t *testing.T) {
-	data, err := hex.DecodeString("588e0da0be236e399f38e8fb37c51fdcec76b98818ecdcc814efb210141d933d")
+	t.Skip()
+	config.SetEnv(
+		12345678, "ws://127.0.0.1:9546",
+		"0xf40E44EbE417A844BA3C4CeFC8bfF7ab38C483F0", "0x0000000000000000000000000000000000002004",
+		"", "test",
+		"./testdata/UTC--2023-06-05T09-50-10.886531000Z--989777e983d4fccba32d857d797fdb75c27571c5", "123456",
+	)
+
+	chainConfig := config.LoadChainConfig()
+	ethCli, err := ethclient.Dial(chainConfig.Addr)
+	if err != nil {
+		logger.Error("failed to connect to ", "node addr", chainConfig.Addr)
+		return
+	}
+
+	oracleCli, err := actor.NewFunctionOracle(common.HexToAddress(chainConfig.FuncOracleClientAddr()), ethCli)
+	if err != nil {
+		logger.Error("failed to new function consumer", "err", err)
+		return
+	}
+
+	data, err := hex.DecodeString("26f826bf5493d96559904bcde50d2efea4acb3ad2d770a54c2bd2c44670a1da0")
 	fmt.Println(data, " ", err)
 	requestId := [32]byte(data)
 
 	fmt.Println(hex.EncodeToString(requestId[:]))
 	fmt.Println(string(requestId[:]))
+	sink := make(chan *actor.FunctionOracleOracleResponse)
+	defer close(sink)
+	respSub, err := oracleCli.WatchOracleResponse(&bind.WatchOpts{Context: context.Background()}, sink, [][32]byte{requestId})
+	if err != nil {
+		return
+	}
+	defer respSub.Unsubscribe()
+
+	auth, err := bind.NewKeyedTransactorWithChainID(chainConfig.Key().PrivateKey, new(big.Int).SetInt64(chainConfig.ChainID()))
+	if err != nil {
+		logger.Error("failed to new keyed tx", "err", err)
+		return
+	}
+
+	logger.Info("start to fulfill request")
+	tx, err := oracleCli.FulfillRequestByNode(&bind.TransactOpts{
+		From:   auth.From,
+		Signer: auth.Signer,
+	}, requestId, common.HexToAddress(chainConfig.FuncClientAddr()), new(big.Int).SetInt64(3425), []byte("resp"), []byte(""))
+	if err != nil {
+		logger.Error("cannot send FulfillRequestByNode tx", "requestId", requestId, "err", err)
+		return
+	}
+	logger.Info("wait to chain log event")
+	select {
+	case resp := <-sink:
+		logger.Info("node fulfilled request", "tx hash", tx.Hash().String(), "blockNumber", resp.Raw.BlockNumber, "tx", resp.Raw.TxHash)
+
+	case err = <-respSub.Err():
+		logger.Error("failed to send resp", "err", err)
+		return
+	}
 }
 
 func TestSubscriber_Send(t *testing.T) {

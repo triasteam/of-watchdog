@@ -173,34 +173,40 @@ func (cs *Interactor) FulfillRequest() {
 
 					sink := make(chan *actor.FunctionOracleOracleResponse)
 					defer close(sink)
-					respSub, err := cs.oracleClient.WatchOracleResponse(&bind.WatchOpts{Context: context.Background()}, sink, [][32]byte{requestId})
-					if err != nil {
-						return err
+					ctx, cancle := context.WithTimeout(context.Background(), time.Second*30)
+					defer cancle()
+					respSub, err2 := cs.oracleClient.WatchOracleResponse(&bind.WatchOpts{Context: ctx}, sink, [][32]byte{requestId})
+					if err2 != nil {
+						return err2
 					}
 					defer respSub.Unsubscribe()
 					logger.Info("start to fulfill request")
-					tx, err := cs.oracleClient.FulfillRequestByNode(&bind.TransactOpts{
+					tx, err2 := cs.oracleClient.FulfillRequestByNode(&bind.TransactOpts{
 						From:   auth.From,
 						Signer: auth.Signer,
 					}, requestId, common.HexToAddress(cs.Configure.FuncClientAddr()), new(big.Int).SetInt64(ret.NodeScore), ret.Resp, ret.Err)
-					if err != nil {
-						logger.Error("cannot send FulfillRequestByNode tx", "requestId", reqID, "err", err)
-						return errors.WithMessagef(err, "cannot send FulfillRequestByNode tx")
+					if err2 != nil {
+						logger.Error("cannot send FulfillRequestByNode tx", "requestId", reqID, "err", err2)
+						return errors.WithMessagef(err2, "cannot send FulfillRequestByNode tx")
 					}
 					logger.Info("wait to chain log event")
 					select {
+					case <-ctx.Done():
+						logger.Error("wait log event timeout", "err", ctx.Err())
 					case resp := <-sink:
 						logger.Info("node fulfilled request", "tx hash", tx.Hash().String(), "blockNumber", resp.Raw.BlockNumber, "tx", resp.Raw.TxHash)
 
-					case err = <-respSub.Err():
-						logger.Error("failed to send resp", "err", err)
-						return err
+					case err2 = <-respSub.Err():
+						logger.Error("failed to send resp", "err", err2)
+						//return err
 					}
-					return nil
+					logger.Info("finish waiting to chain log event")
+					return err2
 				},
 				retry.Attempts(5),
 				retry.Delay(100*time.Millisecond),
-				retry.MaxDelay(300*time.Millisecond))
+				retry.MaxDelay(300*time.Millisecond),
+			)
 
 			if err != nil {
 				logger.Error("failed to call HandleOracleFulfillment", "err", err)
@@ -219,12 +225,12 @@ func (cs *Interactor) Reply(data *FulFilledRequest) {
 }
 
 func (cs *Interactor) Send(data []byte) error {
-	cs.publishChannel <- data
+	//cs.publishChannel <- data
 	return nil
 }
 
 func (cs *Interactor) Receive() chan []byte {
-	return cs.publishChannel
+	return nil
 }
 
 func (cs *Interactor) watch() {

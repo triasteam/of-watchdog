@@ -16,10 +16,10 @@ import (
 	"time"
 
 	"github.com/openfaas/of-watchdog/chain"
+	"github.com/openfaas/of-watchdog/executor"
 
 	limiter "github.com/openfaas/faas-middleware/concurrency-limiter"
 	"github.com/openfaas/of-watchdog/config"
-	"github.com/openfaas/of-watchdog/executor"
 	"github.com/openfaas/of-watchdog/logger"
 	"github.com/openfaas/of-watchdog/metrics"
 	"github.com/prometheus/client_golang/prometheus/testutil"
@@ -79,13 +79,18 @@ func main() {
 
 	logger.Info("watch dog info", "Watchdog mode", config.WatchdogMode(watchdogConfig.OperationalMode), "fprocess", watchdogConfig.FunctionProcess)
 
+	chainConfig := config.LoadChainConfig()
+	publisher := chain.NewSubscriber(chainConfig)
+	defer publisher.Clean()
+	chainHandler := executor.NewChainHandler(publisher, chainConfig.VerifierScoreAddr(), watchdogConfig.UpstreamURL, watchdogConfig.ExecTimeout)
+
 	httpMetrics := metrics.NewHttp()
 	http.HandleFunc("/", metrics.InstrumentHandler(requestHandler, httpMetrics))
 	http.HandleFunc("/_/health", makeHealthHandler())
 	http.Handle("/_/ready", &readiness{
 		// make sure to pass original handler, before it's been wrapped by
 		// the limiter
-		functionHandler: baseFunctionHandler,
+		functionHandler: chainHandler.MakeChainHandler(baseFunctionHandler),
 		endpoint:        watchdogConfig.ReadyEndpoint,
 		lockCheck:       lockFilePresent,
 		limiter:         limit,
@@ -97,12 +102,6 @@ func main() {
 	cancel := make(chan bool)
 
 	go metricsServer.Serve(cancel)
-
-	chainConfig := config.LoadChainConfig()
-	publisher := chain.NewSubscriber(chainConfig)
-	defer publisher.Clean()
-	chainHandler := executor.NewChainHandler(publisher, chainConfig.VerifierScoreAddr(), watchdogConfig.UpstreamURL, watchdogConfig.ExecTimeout)
-	go chainHandler.Run()
 
 	s := &http.Server{
 		Addr:           fmt.Sprintf(":%d", watchdogConfig.TCPPort),

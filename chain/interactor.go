@@ -3,16 +3,9 @@ package chain
 import (
 	"context"
 	"encoding/hex"
-	"encoding/json"
-	"fmt"
 	"math/big"
-	"reflect"
 	"sync"
 	"time"
-
-	"github.com/openfaas/of-watchdog/chain/actor"
-	"github.com/openfaas/of-watchdog/chain/cbor"
-	"github.com/openfaas/of-watchdog/logger"
 
 	"github.com/avast/retry-go/v4"
 	"github.com/ethereum/go-ethereum"
@@ -20,7 +13,10 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/openfaas/of-watchdog/chain/actor"
+	"github.com/openfaas/of-watchdog/logger"
 	"github.com/pkg/errors"
 	"go.uber.org/atomic"
 )
@@ -41,7 +37,7 @@ type Configure interface {
 	VerifierScoreAddr() string
 }
 
-type Subscriber struct {
+type Interactor struct {
 	Configure
 	ethCli         *ethclient.Client
 	functionClient *actor.FunctionClient
@@ -56,9 +52,9 @@ type Subscriber struct {
 	repliedChan    chan *FulFilledRequest
 }
 
-func NewSubscriber(cfg Configure) *Subscriber {
+func NewSubscriber(cfg Configure) *Interactor {
 
-	sub := &Subscriber{
+	sub := &Interactor{
 		Configure: cfg,
 
 		renewChan:      make(chan struct{}),
@@ -75,7 +71,7 @@ func NewSubscriber(cfg Configure) *Subscriber {
 	return sub
 }
 
-func (cs *Subscriber) Clean() {
+func (cs *Interactor) Clean() {
 	cs.cleanOnce.Do(func() {
 		close(cs.renewChan)
 		close(cs.dailEthDone)
@@ -84,7 +80,7 @@ func (cs *Subscriber) Clean() {
 
 }
 
-func (cs *Subscriber) resetEthCli(cli *ethclient.Client) {
+func (cs *Interactor) resetEthCli(cli *ethclient.Client) {
 
 	cs.ethCli = cli
 	funcCli, err := actor.NewFunctionClient(common.HexToAddress(cs.FuncClientAddr()), cs.ethCli)
@@ -99,7 +95,7 @@ func (cs *Subscriber) resetEthCli(cli *ethclient.Client) {
 	cs.functionClient = funcCli
 }
 
-func (cs *Subscriber) retryDailEth(addr string) {
+func (cs *Interactor) retryDailEth(addr string) {
 	start := time.Now()
 	err := retry.Do(
 		func() error {
@@ -123,7 +119,7 @@ func (cs *Subscriber) retryDailEth(addr string) {
 	logger.Info("re-dail eth cost time", "dur", dur.String())
 }
 
-func (cs *Subscriber) ConnectLoop() {
+func (cs *Interactor) ConnectLoop() {
 	for {
 		select {
 		case _, ok := <-cs.renewChan:
@@ -145,7 +141,7 @@ type FulFilledRequest struct {
 	Err       []byte
 }
 
-func (cs *Subscriber) FulfillRequest() {
+func (cs *Interactor) FulfillRequest() {
 	timer := time.NewTicker(2 * time.Second)
 	defer timer.Stop()
 	for {
@@ -175,13 +171,6 @@ func (cs *Subscriber) FulfillRequest() {
 						return errors.New("subscriber is resubscribing, isRenewed is false")
 					}
 
-					sink := make(chan *actor.FunctionOracleOracleResponse)
-					defer close(sink)
-					respSub, err := cs.oracleClient.WatchOracleResponse(&bind.WatchOpts{Context: context.Background()}, sink, [][32]byte{requestId})
-					if err != nil {
-						return err
-					}
-					defer respSub.Unsubscribe()
 					tx, err := cs.oracleClient.FulfillRequestByNode(&bind.TransactOpts{
 						From:   auth.From,
 						Signer: auth.Signer,
@@ -190,19 +179,14 @@ func (cs *Subscriber) FulfillRequest() {
 						logger.Error("cannot send FulfillRequestByNode tx", "requestId", string(reqID), "err", err)
 						return errors.WithMessagef(err, "cannot send FulfillRequestByNode tx")
 					}
-					var (
-						resp *actor.FunctionOracleOracleResponse
-					)
-					select {
-					case resp = <-sink:
-						logger.Info("received OracleResponse event after FulfillRequestByNode", "log", resp)
-					case err = <-respSub.Err():
-						logger.Error("failed to send resp", "err", err)
+					mined, err := bind.WaitMined(context.Background(), cs.ethCli, tx)
+					if err != nil {
+						logger.Error("failed to wait mined", "err", err)
 						return err
 					}
 
-					logger.Info("node fulfilled request", "tx hash", tx.Hash().String(), "blockNumber", resp.Raw.BlockNumber, "reqId", hex.EncodeToString(resp.RequestId[:]))
-					logger.Info("node fulfilled request", "tx hash", tx.Hash().String())
+					logger.Info("node fulfilled request", "tx hash", tx.Hash().String(), "blockNumber", mined.BlockNumber, "tx", mined.TxHash.Hex())
+
 					return nil
 				},
 				retry.Attempts(5),
@@ -220,27 +204,29 @@ func (cs *Subscriber) FulfillRequest() {
 
 }
 
-func (cs *Subscriber) Reply(data *FulFilledRequest) {
+func (cs *Interactor) Reply(data *FulFilledRequest) {
+
 	cs.repliedChan <- data
 }
 
-func (cs *Subscriber) Send(data []byte) error {
+func (cs *Interactor) Send(data []byte) error {
 	cs.publishChannel <- data
 	return nil
 }
 
-func (cs *Subscriber) Receive() chan []byte {
+func (cs *Interactor) Receive() chan []byte {
 	return cs.publishChannel
 }
 
-func (cs *Subscriber) watch() {
+func (cs *Interactor) watch() {
 
 	query := ethereum.FilterQuery{
-		Addresses: []common.Address{
-			common.HexToAddress(cs.FuncClientAddr()),
-			common.HexToAddress(cs.FuncOracleClientAddr()),
+		Topics: [][]common.Hash{
+			{
+				crypto.Keccak256Hash(RequestFulfilled),
+				crypto.Keccak256Hash(OracleResponse),
+			},
 		},
-		Topics: [][]common.Hash{},
 	}
 	logs := make(chan types.Log)
 	var (
@@ -290,44 +276,32 @@ func (cs *Subscriber) watch() {
 			sub = nil
 			cs.isRenewed.CAS(true, false)
 		case vLog := <-logs:
-			data, err := cs.selectEvent(vLog)
+			err = cs.selectEvent(vLog)
 			if err != nil {
 				continue
 			}
-			logger.Info("watched event successfully", "data", data)
 		}
 	}
 
 }
 
-func (cs *Subscriber) selectEvent(vLog types.Log) (interface{}, error) {
-	var (
-		data interface{}
-	)
+func (cs *Interactor) selectEvent(vLog types.Log) error {
+
 	logger.Info("log topic", "value", vLog.Topics[0].Hex())
 	switch vLog.Topics[0].Hex() {
 	case OracleResponseSignature:
 		resp, err := cs.oracleClient.ParseOracleResponse(vLog)
 		if err != nil {
 			logger.Error("failed to parse function response", "err", err)
-			return nil, err
+			return err
 		}
 		logger.Info("received OracleResponse event", "log", resp)
-		data = resp
-	case OracleRequestTimeoutSignature:
 
-		resp, err := cs.oracleClient.ParseOracleRequestTimeout(vLog)
-		if err != nil {
-			logger.Error("failed to parse request timeout event", "err", err)
-			return nil, err
-		}
-		logger.Info("received OracleRequestTimeout event", "log", resp)
-		data = resp
 	case RequestFulfilledSignature:
 		resp, err := cs.functionClient.ParseRequestFulfilled(vLog)
 		if err != nil {
 			logger.Error("failed to parse function response", "err", err)
-			return nil, err
+			return err
 		}
 		logger.Info("received RequestFulfilled event",
 			"reqId", hex.EncodeToString(resp.Id[:]),
@@ -336,90 +310,8 @@ func (cs *Subscriber) selectEvent(vLog types.Log) (interface{}, error) {
 			"resp", string(resp.Result),
 			"err", string(resp.Err),
 		)
-		data = resp
-	case RequestSentSignature:
-		sent, err := cs.functionClient.ParseRequestSent(vLog)
-		if err != nil {
-			logger.Error("failed to parse RequestSent event", "err", err)
-			return nil, err
-		}
-		logger.Info("received RequestSent event", "log", sent.Id)
-		data = sent
-	case OracleRequestSignature:
-
-		sent, err := cs.oracleClient.ParseOracleRequest(vLog)
-		if err != nil {
-			logger.Error("failed to parse OracleRequest event", "err", err)
-			return nil, err
-		}
-		logger.Info("receive OracleRequest event",
-			"requestId", hex.EncodeToString(sent.RequestId[:]),
-			"requestContract", sent.RequestingContract,
-			"requestInitiator", sent.RequestInitiator,
-			"from contract", sent.RequestingContract.String(),
-			"functionId", hex.EncodeToString(sent.FunctionId[:]),
-		)
-
-		logger.Debug("request raw data", "hex req data", hex.EncodeToString(sent.Data))
-
-		reqRawDataMap, err := cbor.ParseDietCBOR(sent.Data)
-		if err != nil {
-			logger.Error("failed to decode contract request", "err", err)
-			return nil, err
-		}
-
-		logger.Info("decode requested data", "raw args ", reqRawDataMap)
-		err = callFunction(cs, hex.EncodeToString(sent.RequestId[:]), reqRawDataMap)
-		if err != nil {
-			logger.Error("failed to call function", "err", err)
-			return nil, err
-		}
-
 	default:
-		return nil, errors.Errorf("not listen to the event, topic:%s, addr: %v", vLog.Topics[0].Hex(), vLog.Address)
+		logger.Info("not listen to the event", "topic", vLog.Topics[0].Hex(), "contract address", vLog.Address)
 	}
-	return data, nil
-}
-
-type FunctionRequest struct {
-	FunctionName string
-	RequestURL   string
-	ReqId        string
-	Body         map[string]interface{}
-}
-
-func callFunction(pub Publish, reqID string, reqRawDataMap map[string]interface{}) error {
-
-	fnBodyMap := map[string]interface{}{}
-
-	if v, ok := reqRawDataMap["args"]; ok && v != nil {
-
-		var sets []interface{}
-		switch v.(type) {
-		case []interface{}:
-			sets = v.([]interface{})
-		default:
-			logger.Error("request body has wrong format", "args", v, "type", reflect.TypeOf(v))
-		}
-
-		if !ok {
-			logger.Error("request args format is wrong", "args", v, "type", reflect.TypeOf(v).Name())
-			return errors.Errorf("request args format is wrong, aegs: %v", v)
-		}
-		for i := 0; i+1 < len(sets); i += 2 {
-			fnBodyMap[fmt.Sprintf("%v", sets[i])] = sets[i+1]
-		}
-	}
-
-	fr := FunctionRequest{
-		ReqId: reqID,
-		Body:  fnBodyMap,
-	}
-	bodyBytes, err := json.Marshal(fr)
-	if err != nil {
-		logger.Error("failed to decode request args to map", "err", err)
-		return err
-	}
-	_ = pub.Send(bodyBytes)
 	return nil
 }

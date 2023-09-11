@@ -15,6 +15,22 @@ import (
 	"github.com/openfaas/of-watchdog/logger"
 )
 
+type loggingResponseWriter struct {
+	http.ResponseWriter
+	statusCode int
+}
+
+func NewLoggingResponseWriter(w http.ResponseWriter) *loggingResponseWriter {
+	// WriteHeader(int) is not called if our response implicitly returns 200 OK, so
+	// we default to that status code.
+	return &loggingResponseWriter{w, http.StatusOK}
+}
+
+func (lrw *loggingResponseWriter) WriteHeader(code int) {
+	lrw.statusCode = code
+	lrw.ResponseWriter.WriteHeader(code)
+}
+
 type ChainHandler struct {
 	publisher            chain.Publish
 	FunctionsProviderURL string
@@ -32,62 +48,58 @@ func NewChainHandler(
 ) *ChainHandler {
 	return &ChainHandler{
 		publisher:            publisher,
-		FunctionsProviderURL: FunctionsProviderURL,
 		LocalVerifierAddress: LocalVerifierAddress,
 		Client:               makeProxyClient(timeout),
 		ExecTimeout:          timeout,
 	}
 }
 
-func (ch ChainHandler) Run() {
-	reqData := &chain.FunctionRequest{}
-	for true {
-		select {
-		case dataByte := <-ch.publisher.Receive():
+func (ch *ChainHandler) MakeChainHandler(preHandler http.Handler) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var (
+			bodyBytes []byte
+			errBytes  []byte
+			err       error
+		)
 
-			logger.Info("receive request data", "value", string(dataByte))
-			err := json.Unmarshal(dataByte, reqData)
-			if err != nil {
-				logger.Error("failed to unmarshal from the chain", "data", string(dataByte), "err", err)
-				continue
-			}
-		}
-		var errRet []byte
-		marshal, err := json.Marshal(reqData.Body)
-		if err != nil {
-			logger.Error("failed to unmarshal function request body", "err", err)
-			continue
-		}
+		lrw := NewLoggingResponseWriter(w)
+		preHandler.ServeHTTP(lrw, r)
+		if lrw.statusCode != http.StatusOK {
+			// Copy the body over
+			_, err = io.CopyBuffer(w, bytes.NewReader(errBytes), nil)
 
-		reqHttp, err := http.NewRequest(http.MethodPost, ch.FunctionsProviderURL, bytes.NewReader(marshal))
-		if err != nil {
-			logger.Error("failed to new http request", "err", err)
-			continue
+		} else {
+			// Copy the body over
+			_, err = io.CopyBuffer(w, bytes.NewReader(bodyBytes), nil)
+
 		}
-		reqHttp.Header.Set("requestId", reqData.ReqId)
-		resp, err := ch.ExecFunction(reqHttp)
 		if err != nil {
-			errRet = []byte(err.Error())
+			logger.Error("failed to copy response body", "err", err)
+			return
 		}
 
+		reqId := r.Header.Get("requestId")
+		if reqId == "" {
+			logger.Info("not found requestId")
+			return
+		}
 		ret := &chain.FulFilledRequest{
-			RequestId: reqData.ReqId,
-			Resp:      resp,
+			RequestId: reqId,
+			Resp:      bodyBytes,
 			NodeScore: ch.GetLocalWorkScore(),
-			Err:       errRet,
+			Err:       errBytes,
 		}
+
 		ch.publisher.Reply(ret)
 		if ret.Err != nil {
 			logger.Error("failed to execute function", "err", string(ret.Err))
-			continue
+			return
 		}
-
-		logger.Info("get result from function", "ret", ret)
 	}
 
 }
 
-func (ch ChainHandler) GetLocalWorkScore() int64 {
+func (ch *ChainHandler) GetLocalWorkScore() int64 {
 
 	type VerifierResp struct {
 		Data struct {
@@ -119,7 +131,7 @@ func (ch ChainHandler) GetLocalWorkScore() int64 {
 	return ch.lastWorkScore
 }
 
-func (ch ChainHandler) ExecFunction(r *http.Request) ([]byte, error) {
+func (ch *ChainHandler) ExecFunction(r *http.Request) ([]byte, error) {
 	startedTime := time.Now()
 	var reqCtx context.Context
 	var cancel context.CancelFunc

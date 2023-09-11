@@ -30,7 +30,7 @@ func (r *readiness) LimitMet() bool {
 }
 
 func (r *readiness) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	logger.Info("http req method,method:%v, scheme:%v, url:%v, endpoint: %v \n", req.Method, req.URL.Scheme, req.URL.Host, r.endpoint)
+	logger.Info("readiness ServeHTTP", "method", req.Method, "scheme", req.URL.Scheme, "url", req.URL.Host, "endpoint", r.endpoint)
 	switch req.Method {
 	case http.MethodGet:
 		status := http.StatusOK

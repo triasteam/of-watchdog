@@ -55,7 +55,9 @@ func NewChainHandler(
 }
 
 func (ch *ChainHandler) MakeChainHandler(preHandler http.Handler) http.HandlerFunc {
+
 	return func(w http.ResponseWriter, r *http.Request) {
+		logger.Info("go into MakeChainHandler")
 		var (
 			bodyBytes []byte
 			errBytes  []byte
@@ -63,7 +65,9 @@ func (ch *ChainHandler) MakeChainHandler(preHandler http.Handler) http.HandlerFu
 		)
 
 		lrw := NewLoggingResponseWriter(w)
+
 		preHandler.ServeHTTP(lrw, r)
+
 		if lrw.statusCode != http.StatusOK {
 			// Copy the body over
 			_, err = io.CopyBuffer(w, bytes.NewReader(errBytes), nil)
@@ -83,6 +87,7 @@ func (ch *ChainHandler) MakeChainHandler(preHandler http.Handler) http.HandlerFu
 			logger.Info("not found requestId")
 			return
 		}
+		logger.Info("get requestId", "v", reqId)
 		ret := &chain.FulFilledRequest{
 			RequestId: reqId,
 			Resp:      bodyBytes,
@@ -91,10 +96,6 @@ func (ch *ChainHandler) MakeChainHandler(preHandler http.Handler) http.HandlerFu
 		}
 
 		ch.publisher.Reply(ret)
-		if ret.Err != nil {
-			logger.Error("failed to execute function", "err", string(ret.Err))
-			return
-		}
 	}
 
 }

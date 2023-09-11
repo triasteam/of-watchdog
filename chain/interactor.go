@@ -171,22 +171,31 @@ func (cs *Interactor) FulfillRequest() {
 						return errors.New("subscriber is resubscribing, isRenewed is false")
 					}
 
+					sink := make(chan *actor.FunctionOracleOracleResponse)
+					defer close(sink)
+					respSub, err := cs.oracleClient.WatchOracleResponse(&bind.WatchOpts{Context: context.Background()}, sink, [][32]byte{requestId})
+					if err != nil {
+						return err
+					}
+					defer respSub.Unsubscribe()
+					logger.Info("start to fulfill request")
 					tx, err := cs.oracleClient.FulfillRequestByNode(&bind.TransactOpts{
 						From:   auth.From,
 						Signer: auth.Signer,
-					}, requestId, common.HexToAddress(cs.Configure.FuncOracleClientAddr()), new(big.Int).SetInt64(ret.NodeScore), ret.Resp, ret.Err)
+					}, requestId, common.HexToAddress(cs.Configure.FuncClientAddr()), new(big.Int).SetInt64(ret.NodeScore), ret.Resp, ret.Err)
 					if err != nil {
-						logger.Error("cannot send FulfillRequestByNode tx", "requestId", string(reqID), "err", err)
+						logger.Error("cannot send FulfillRequestByNode tx", "requestId", reqID, "err", err)
 						return errors.WithMessagef(err, "cannot send FulfillRequestByNode tx")
 					}
-					mined, err := bind.WaitMined(context.Background(), cs.ethCli, tx)
-					if err != nil {
-						logger.Error("failed to wait mined", "err", err)
+					logger.Info("wait to chain log event")
+					select {
+					case resp := <-sink:
+						logger.Info("node fulfilled request", "tx hash", tx.Hash().String(), "blockNumber", resp.Raw.BlockNumber, "tx", resp.Raw.TxHash)
+
+					case err = <-respSub.Err():
+						logger.Error("failed to send resp", "err", err)
 						return err
 					}
-
-					logger.Info("node fulfilled request", "tx hash", tx.Hash().String(), "blockNumber", mined.BlockNumber, "tx", mined.TxHash.Hex())
-
 					return nil
 				},
 				retry.Attempts(5),

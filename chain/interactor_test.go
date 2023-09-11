@@ -3,6 +3,7 @@ package chain
 import (
 	"context"
 	"encoding/hex"
+	"fmt"
 	"testing"
 	"time"
 
@@ -33,6 +34,15 @@ func TestParseLog(t *testing.T) {
 	//go sub.watch()
 	//function signature	{"RequestFulfilledSignature": "0xf2fa06652e54791d449ab43ede930a20d3b71ed330cad4018f47ba6cc15da00a", "RequestSentSignature": "0x91f0d67c2f27abd6cfc317e120d5e80b31e97b9926b65d3887e59402fb20adfb", "OracleRequestSignature": "0x8fe1923fd8e0dc61a5bd16b4ed3ede4f2c6ee0de6f729fab847432965b138aa3"}
 	time.Sleep(time.Second * 6000)
+}
+
+func TestInteractor_FulfillRequest(t *testing.T) {
+	data, err := hex.DecodeString("588e0da0be236e399f38e8fb37c51fdcec76b98818ecdcc814efb210141d933d")
+	fmt.Println(data, " ", err)
+	requestId := [32]byte(data)
+
+	fmt.Println(hex.EncodeToString(requestId[:]))
+	fmt.Println(string(requestId[:]))
 }
 
 func TestSubscriber_Send(t *testing.T) {

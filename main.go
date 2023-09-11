@@ -83,6 +83,7 @@ func main() {
 	publisher := chain.NewSubscriber(chainConfig)
 	defer publisher.Clean()
 	chainHandler := executor.NewChainHandler(publisher, chainConfig.VerifierScoreAddr(), watchdogConfig.UpstreamURL, watchdogConfig.ExecTimeout)
+	requestHandler = chainHandler.MakeChainHandler(baseFunctionHandler)
 
 	httpMetrics := metrics.NewHttp()
 	http.HandleFunc("/", metrics.InstrumentHandler(requestHandler, httpMetrics))
@@ -90,7 +91,7 @@ func main() {
 	http.Handle("/_/ready", &readiness{
 		// make sure to pass original handler, before it's been wrapped by
 		// the limiter
-		functionHandler: chainHandler.MakeChainHandler(baseFunctionHandler),
+		functionHandler: baseFunctionHandler,
 		endpoint:        watchdogConfig.ReadyEndpoint,
 		lockCheck:       lockFilePresent,
 		limiter:         limit,

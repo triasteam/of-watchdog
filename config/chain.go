@@ -1,6 +1,7 @@
 package config
 
 import (
+	"encoding/base64"
 	"encoding/hex"
 	"errors"
 	"fmt"
@@ -25,6 +26,7 @@ type Chain struct {
 	FunctionName       string `mapstructure:"function_name" json:"function_name"`
 	KeyFilePath        string `mapstructure:"key_file_path" json:"key_file_path"`
 	KeyPassword        string `mapstructure:"key_password" json:"key_password"`
+	KeyBass64          string `mapstructure:"key_base64" json:"key_base64"`
 }
 
 func LoadChainConfig() *Chain {
@@ -75,7 +77,7 @@ func validateChainConfig(cfg *Chain) error {
 	if cfg.FunctionOracleAddr == "" {
 		return errors.New("not found FunctionOracleAddr, please set the value of env CHAIN_FUNCTION_ORACLE_ADDR")
 	}
-	if cfg.KeyFilePath == "" {
+	if cfg.KeyFilePath == "" || cfg.KeyBass64 == "" {
 		return errors.New("not found KeyFilePath, please set the value of env CHAIN_KEY_FILE_PATH")
 	}
 
@@ -99,10 +101,25 @@ func (c Chain) ChainAddr() string {
 }
 
 func (c Chain) Key() *keystore.Key {
+	var (
+		keyBytes []byte
+		err      error
+	)
+	if c.KeyBass64 != "" {
+		keyBytes, err = base64.StdEncoding.DecodeString(c.KeyBass64)
+		if err != nil {
+			logger.Fatal("failed to read key base64 string", "err", err)
+		}
+	}
+	if c.KeyFilePath != "" {
+		keyBytes, err = os.ReadFile(c.KeyFilePath)
+		if err != nil {
+			logger.Fatal("failed to read key file", "err", err)
+		}
 
-	keyBytes, err := os.ReadFile(c.KeyFilePath)
-	if err != nil {
-		logger.Fatal("failed to read key file", "err", err)
+	}
+	if len(keyBytes) == 0 {
+		logger.Fatal("not found key")
 	}
 
 	key, err := keystore.DecryptKey(keyBytes, c.KeyPassword)

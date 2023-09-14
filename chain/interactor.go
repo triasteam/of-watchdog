@@ -21,6 +21,8 @@ import (
 	"go.uber.org/atomic"
 )
 
+var defaultGasPrice = big.NewInt(200)
+
 type Publish interface {
 	Send([]byte) error
 	Receive() chan []byte
@@ -142,7 +144,7 @@ type FulFilledRequest struct {
 }
 
 func (cs *Interactor) FulfillRequest() {
-	timer := time.NewTicker(2 * time.Second)
+	timer := time.NewTicker(60 * time.Second)
 	defer timer.Stop()
 	for {
 		var ret *FulFilledRequest
@@ -180,10 +182,17 @@ func (cs *Interactor) FulfillRequest() {
 						return err2
 					}
 					defer respSub.Unsubscribe()
-					logger.Info("start to fulfill request")
+					gasPrice, err2 := cs.ethCli.SuggestGasPrice(ctx)
+					if err2 != nil {
+						logger.Error("failed to get suggest gas price", "err", err)
+						gasPrice = defaultGasPrice
+					}
+
+					logger.Info("start to fulfill request", "gas price", gasPrice.String())
 					tx, err2 := cs.oracleClient.FulfillRequestByNode(&bind.TransactOpts{
-						From:   auth.From,
-						Signer: auth.Signer,
+						From:     auth.From,
+						Signer:   auth.Signer,
+						GasPrice: gasPrice,
 					}, requestId, common.HexToAddress(cs.Configure.FuncClientAddr()), new(big.Int).SetInt64(ret.NodeScore), ret.Resp, ret.Err)
 					if err2 != nil {
 						logger.Error("cannot send FulfillRequestByNode tx", "requestId", reqID, "err", err2)
@@ -192,7 +201,8 @@ func (cs *Interactor) FulfillRequest() {
 					logger.Info("wait to chain log event")
 					select {
 					case <-ctx.Done():
-						logger.Error("wait log event timeout", "err", ctx.Err())
+						err2 = ctx.Err()
+						logger.Error("wait to FulfillRequestByNode finish timeout", "err", ctx.Err())
 					case resp := <-sink:
 						logger.Info("node fulfilled request", "tx hash", tx.Hash().String(), "blockNumber", resp.Raw.BlockNumber, "tx", resp.Raw.TxHash)
 
@@ -204,8 +214,8 @@ func (cs *Interactor) FulfillRequest() {
 					return err2
 				},
 				retry.Attempts(5),
-				retry.Delay(100*time.Millisecond),
-				retry.MaxDelay(300*time.Millisecond),
+				retry.Delay(500*time.Millisecond),
+				retry.MaxDelay(3*time.Second),
 			)
 
 			if err != nil {
@@ -249,7 +259,7 @@ func (cs *Interactor) watch() {
 		err error
 	)
 
-	timer := time.NewTicker(2 * time.Second)
+	timer := time.NewTicker(60 * time.Second)
 	defer timer.Stop()
 	for {
 		for !cs.isRenewed.Load() {

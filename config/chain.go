@@ -77,8 +77,8 @@ func validateChainConfig(cfg *Chain) error {
 	if cfg.FunctionOracleAddr == "" {
 		return errors.New("not found FunctionOracleAddr, please set the value of env CHAIN_FUNCTION_ORACLE_ADDR")
 	}
-	if cfg.KeyFilePath == "" || cfg.KeyBass64 == "" {
-		return errors.New("not found KeyFilePath, please set the value of env CHAIN_KEY_FILE_PATH")
+	if cfg.KeyFilePath == "" && cfg.KeyBass64 == "" {
+		return errors.New("not found Key info, please set the value of env CHAIN_KEY_FILE_PATH")
 	}
 
 	if cfg.KeyPassword == "" {
@@ -111,7 +111,7 @@ func (c Chain) Key() *keystore.Key {
 			logger.Fatal("failed to read key base64 string", "err", err)
 		}
 	}
-	if c.KeyFilePath != "" {
+	if len(keyBytes) == 0 && c.KeyFilePath != "" {
 		keyBytes, err = os.ReadFile(c.KeyFilePath)
 		if err != nil {
 			logger.Fatal("failed to read key file", "err", err)

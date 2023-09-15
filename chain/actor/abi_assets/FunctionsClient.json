@@ -84,11 +84,6 @@
 				"type": "bytes32"
 			},
 			{
-				"internalType": "address",
-				"name": "node",
-				"type": "address"
-			},
-			{
 				"internalType": "uint256",
 				"name": "score",
 				"type": "uint256"

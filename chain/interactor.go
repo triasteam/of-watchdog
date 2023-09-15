@@ -192,18 +192,18 @@ func (cs *Interactor) FulfillRequest() {
 						logger.Error("failed to get suggest gas price", "err", err)
 						gasPrice = defaultGasPrice
 					}
-					sink := make(chan *actor.FunctionOracleOracleResponse)
+					sink := make(chan *actor.FunctionClientRequestFulfilled)
 					defer close(sink)
 					ctx, cancel := context.WithTimeout(context.Background(), time.Second*40)
 					defer cancel()
-					respSub, retryErr := cs.oracleClient.WatchOracleResponse(&bind.WatchOpts{Context: ctx}, sink, [][32]byte{requestId})
+					respSub, retryErr := cs.functionClient.WatchRequestFulfilled(&bind.WatchOpts{Context: ctx}, sink, [][32]byte{requestId}, nil)
 					if retryErr != nil {
 						return retryErr
 					}
 					defer respSub.Unsubscribe()
 
 					logger.Info("start to fulfill request", "gas price", gasPrice.String())
-					tx, retryErr := cs.oracleClient.FulfillRequestByNode(&bind.TransactOpts{
+					tx, retryErr := cs.functionClient.HandleOracleFulfillment(&bind.TransactOpts{
 						From:     auth.From,
 						Signer:   auth.Signer,
 						GasPrice: gasPrice.Add(gasPrice, big.NewInt(1)),

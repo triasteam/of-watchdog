@@ -31,7 +31,7 @@ var (
 
 // FunctionClientMetaData contains all meta data concerning the FunctionClient contract.
 var FunctionClientMetaData = &bind.MetaData{
-	ABI: "[{\"inputs\":[],\"name\":\"EmptyRequestData\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"RequestIsAlreadyPending\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"SenderIsNotRegistry\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"id\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"node\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"score\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"result\",\"type\":\"bytes\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"err\",\"type\":\"bytes\"}],\"name\":\"RequestFulfilled\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"id\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"functionId\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"funcWorker\",\"type\":\"address\"}],\"name\":\"RequestSent\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"requestId\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"node\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"score\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"response\",\"type\":\"bytes\"},{\"internalType\":\"bytes\",\"name\":\"err\",\"type\":\"bytes\"}],\"name\":\"handleOracleFulfillment\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"oracle\",\"type\":\"address\"}],\"name\":\"setOracle\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]",
+	ABI: "[{\"inputs\":[],\"name\":\"EmptyRequestData\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"RequestIsAlreadyPending\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"SenderIsNotRegistry\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"id\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"node\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"score\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"result\",\"type\":\"bytes\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"err\",\"type\":\"bytes\"}],\"name\":\"RequestFulfilled\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"id\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"functionId\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"funcWorker\",\"type\":\"address\"}],\"name\":\"RequestSent\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"requestId\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"score\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"response\",\"type\":\"bytes\"},{\"internalType\":\"bytes\",\"name\":\"err\",\"type\":\"bytes\"}],\"name\":\"handleOracleFulfillment\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"oracle\",\"type\":\"address\"}],\"name\":\"setOracle\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]",
 }
 
 // FunctionClientABI is the input ABI used to generate the binding from.
@@ -180,25 +180,25 @@ func (_FunctionClient *FunctionClientTransactorRaw) Transact(opts *bind.Transact
 	return _FunctionClient.Contract.contract.Transact(opts, method, params...)
 }
 
-// HandleOracleFulfillment is a paid mutator transaction binding the contract method 0x42ba6d28.
+// HandleOracleFulfillment is a paid mutator transaction binding the contract method 0xfba45fbe.
 //
-// Solidity: function handleOracleFulfillment(bytes32 requestId, address node, uint256 score, bytes response, bytes err) returns()
-func (_FunctionClient *FunctionClientTransactor) HandleOracleFulfillment(opts *bind.TransactOpts, requestId [32]byte, node common.Address, score *big.Int, response []byte, err []byte) (*types.Transaction, error) {
-	return _FunctionClient.contract.Transact(opts, "handleOracleFulfillment", requestId, node, score, response, err)
+// Solidity: function handleOracleFulfillment(bytes32 requestId, uint256 score, bytes response, bytes err) returns()
+func (_FunctionClient *FunctionClientTransactor) HandleOracleFulfillment(opts *bind.TransactOpts, requestId [32]byte, score *big.Int, response []byte, err []byte) (*types.Transaction, error) {
+	return _FunctionClient.contract.Transact(opts, "handleOracleFulfillment", requestId, score, response, err)
 }
 
-// HandleOracleFulfillment is a paid mutator transaction binding the contract method 0x42ba6d28.
+// HandleOracleFulfillment is a paid mutator transaction binding the contract method 0xfba45fbe.
 //
-// Solidity: function handleOracleFulfillment(bytes32 requestId, address node, uint256 score, bytes response, bytes err) returns()
-func (_FunctionClient *FunctionClientSession) HandleOracleFulfillment(requestId [32]byte, node common.Address, score *big.Int, response []byte, err []byte) (*types.Transaction, error) {
-	return _FunctionClient.Contract.HandleOracleFulfillment(&_FunctionClient.TransactOpts, requestId, node, score, response, err)
+// Solidity: function handleOracleFulfillment(bytes32 requestId, uint256 score, bytes response, bytes err) returns()
+func (_FunctionClient *FunctionClientSession) HandleOracleFulfillment(requestId [32]byte, score *big.Int, response []byte, err []byte) (*types.Transaction, error) {
+	return _FunctionClient.Contract.HandleOracleFulfillment(&_FunctionClient.TransactOpts, requestId, score, response, err)
 }
 
-// HandleOracleFulfillment is a paid mutator transaction binding the contract method 0x42ba6d28.
+// HandleOracleFulfillment is a paid mutator transaction binding the contract method 0xfba45fbe.
 //
-// Solidity: function handleOracleFulfillment(bytes32 requestId, address node, uint256 score, bytes response, bytes err) returns()
-func (_FunctionClient *FunctionClientTransactorSession) HandleOracleFulfillment(requestId [32]byte, node common.Address, score *big.Int, response []byte, err []byte) (*types.Transaction, error) {
-	return _FunctionClient.Contract.HandleOracleFulfillment(&_FunctionClient.TransactOpts, requestId, node, score, response, err)
+// Solidity: function handleOracleFulfillment(bytes32 requestId, uint256 score, bytes response, bytes err) returns()
+func (_FunctionClient *FunctionClientTransactorSession) HandleOracleFulfillment(requestId [32]byte, score *big.Int, response []byte, err []byte) (*types.Transaction, error) {
+	return _FunctionClient.Contract.HandleOracleFulfillment(&_FunctionClient.TransactOpts, requestId, score, response, err)
 }
 
 // SetOracle is a paid mutator transaction binding the contract method 0x7adbf973.

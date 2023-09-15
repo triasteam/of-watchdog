@@ -31,7 +31,7 @@ var (
 
 // FunctionOracleMetaData contains all meta data concerning the FunctionOracle contract.
 var FunctionOracleMetaData = &bind.MetaData{
-	ABI: "[{\"inputs\":[],\"name\":\"Empty\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"EmptyBillingRegistry\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"EmptyPublicKey\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"EmptyRequestData\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InconsistentReportData\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"OutOfBounds\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"UnauthorizedPublicKeyChange\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"requestId\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"requestingContract\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"requestInitiator\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"functionId\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"subscriptionOwner\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"name\":\"OracleRequest\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"requestId\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"birth\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"blockTime\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"reason\",\"type\":\"string\"}],\"name\":\"OracleRequestTimeout\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"requestId\",\"type\":\"bytes32\"}],\"name\":\"OracleResponse\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"EXPIRY_TIME\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"fulfillOracleRequest\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"_requestId\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"oracleAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"score\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"resp\",\"type\":\"bytes\"},{\"internalType\":\"bytes\",\"name\":\"err\",\"type\":\"bytes\"}],\"name\":\"fulfillRequestByNode\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"requestId\",\"type\":\"bytes32\"}],\"name\":\"getReq\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"i\",\"type\":\"uint256\"}],\"name\":\"getSelectorResp\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"init\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"respSelector\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"functionId\",\"type\":\"bytes32\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"name\":\"sendRequest\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]",
+	ABI: "[{\"inputs\":[],\"name\":\"Empty\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"EmptyBillingRegistry\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"EmptyPublicKey\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"EmptyRequestData\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"InconsistentReportData\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"OutOfBounds\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"UnauthorizedPublicKeyChange\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"requestId\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"requestingContract\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"requestInitiator\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"functionId\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"subscriptionOwner\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"name\":\"OracleRequest\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"requestId\",\"type\":\"bytes32\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"birth\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"blockTime\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"reason\",\"type\":\"string\"}],\"name\":\"OracleRequestTimeout\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"requestId\",\"type\":\"bytes32\"}],\"name\":\"OracleResponse\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"id\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"node\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"score\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"result\",\"type\":\"bytes\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"err\",\"type\":\"bytes\"}],\"name\":\"RequestFulfilled\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"EXPIRY_TIME\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"fulfillOracleRequest\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"_requestId\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"score\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"resp\",\"type\":\"bytes\"},{\"internalType\":\"bytes\",\"name\":\"err\",\"type\":\"bytes\"}],\"name\":\"fulfillRequestByNode\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"requestId\",\"type\":\"bytes32\"}],\"name\":\"getReq\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"i\",\"type\":\"uint256\"}],\"name\":\"getSelectorResp\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"init\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"respSelector\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"functionId\",\"type\":\"bytes32\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"name\":\"sendRequest\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]",
 }
 
 // FunctionOracleABI is the input ABI used to generate the binding from.
@@ -325,25 +325,25 @@ func (_FunctionOracle *FunctionOracleTransactorSession) FulfillOracleRequest() (
 	return _FunctionOracle.Contract.FulfillOracleRequest(&_FunctionOracle.TransactOpts)
 }
 
-// FulfillRequestByNode is a paid mutator transaction binding the contract method 0xc51f0db5.
+// FulfillRequestByNode is a paid mutator transaction binding the contract method 0x85fa202c.
 //
-// Solidity: function fulfillRequestByNode(bytes32 _requestId, address oracleAddress, uint256 score, bytes resp, bytes err) returns(bool)
-func (_FunctionOracle *FunctionOracleTransactor) FulfillRequestByNode(opts *bind.TransactOpts, _requestId [32]byte, oracleAddress common.Address, score *big.Int, resp []byte, err []byte) (*types.Transaction, error) {
-	return _FunctionOracle.contract.Transact(opts, "fulfillRequestByNode", _requestId, oracleAddress, score, resp, err)
+// Solidity: function fulfillRequestByNode(bytes32 _requestId, uint256 score, bytes resp, bytes err) returns(bool)
+func (_FunctionOracle *FunctionOracleTransactor) FulfillRequestByNode(opts *bind.TransactOpts, _requestId [32]byte, score *big.Int, resp []byte, err []byte) (*types.Transaction, error) {
+	return _FunctionOracle.contract.Transact(opts, "fulfillRequestByNode", _requestId, score, resp, err)
 }
 
-// FulfillRequestByNode is a paid mutator transaction binding the contract method 0xc51f0db5.
+// FulfillRequestByNode is a paid mutator transaction binding the contract method 0x85fa202c.
 //
-// Solidity: function fulfillRequestByNode(bytes32 _requestId, address oracleAddress, uint256 score, bytes resp, bytes err) returns(bool)
-func (_FunctionOracle *FunctionOracleSession) FulfillRequestByNode(_requestId [32]byte, oracleAddress common.Address, score *big.Int, resp []byte, err []byte) (*types.Transaction, error) {
-	return _FunctionOracle.Contract.FulfillRequestByNode(&_FunctionOracle.TransactOpts, _requestId, oracleAddress, score, resp, err)
+// Solidity: function fulfillRequestByNode(bytes32 _requestId, uint256 score, bytes resp, bytes err) returns(bool)
+func (_FunctionOracle *FunctionOracleSession) FulfillRequestByNode(_requestId [32]byte, score *big.Int, resp []byte, err []byte) (*types.Transaction, error) {
+	return _FunctionOracle.Contract.FulfillRequestByNode(&_FunctionOracle.TransactOpts, _requestId, score, resp, err)
 }
 
-// FulfillRequestByNode is a paid mutator transaction binding the contract method 0xc51f0db5.
+// FulfillRequestByNode is a paid mutator transaction binding the contract method 0x85fa202c.
 //
-// Solidity: function fulfillRequestByNode(bytes32 _requestId, address oracleAddress, uint256 score, bytes resp, bytes err) returns(bool)
-func (_FunctionOracle *FunctionOracleTransactorSession) FulfillRequestByNode(_requestId [32]byte, oracleAddress common.Address, score *big.Int, resp []byte, err []byte) (*types.Transaction, error) {
-	return _FunctionOracle.Contract.FulfillRequestByNode(&_FunctionOracle.TransactOpts, _requestId, oracleAddress, score, resp, err)
+// Solidity: function fulfillRequestByNode(bytes32 _requestId, uint256 score, bytes resp, bytes err) returns(bool)
+func (_FunctionOracle *FunctionOracleTransactorSession) FulfillRequestByNode(_requestId [32]byte, score *big.Int, resp []byte, err []byte) (*types.Transaction, error) {
+	return _FunctionOracle.Contract.FulfillRequestByNode(&_FunctionOracle.TransactOpts, _requestId, score, resp, err)
 }
 
 // Init is a paid mutator transaction binding the contract method 0xe1c7392a.
@@ -832,6 +832,162 @@ func (_FunctionOracle *FunctionOracleFilterer) WatchOracleResponse(opts *bind.Wa
 func (_FunctionOracle *FunctionOracleFilterer) ParseOracleResponse(log types.Log) (*FunctionOracleOracleResponse, error) {
 	event := new(FunctionOracleOracleResponse)
 	if err := _FunctionOracle.contract.UnpackLog(event, "OracleResponse", log); err != nil {
+		return nil, err
+	}
+	event.Raw = log
+	return event, nil
+}
+
+// FunctionOracleRequestFulfilledIterator is returned from FilterRequestFulfilled and is used to iterate over the raw logs and unpacked data for RequestFulfilled events raised by the FunctionOracle contract.
+type FunctionOracleRequestFulfilledIterator struct {
+	Event *FunctionOracleRequestFulfilled // Event containing the contract specifics and raw log
+
+	contract *bind.BoundContract // Generic contract to use for unpacking event data
+	event    string              // Event name to use for unpacking event data
+
+	logs chan types.Log        // Log channel receiving the found contract events
+	sub  ethereum.Subscription // Subscription for errors, completion and termination
+	done bool                  // Whether the subscription completed delivering logs
+	fail error                 // Occurred error to stop iteration
+}
+
+// Next advances the iterator to the subsequent event, returning whether there
+// are any more events found. In case of a retrieval or parsing error, false is
+// returned and Error() can be queried for the exact failure.
+func (it *FunctionOracleRequestFulfilledIterator) Next() bool {
+	// If the iterator failed, stop iterating
+	if it.fail != nil {
+		return false
+	}
+	// If the iterator completed, deliver directly whatever's available
+	if it.done {
+		select {
+		case log := <-it.logs:
+			it.Event = new(FunctionOracleRequestFulfilled)
+			if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+				it.fail = err
+				return false
+			}
+			it.Event.Raw = log
+			return true
+
+		default:
+			return false
+		}
+	}
+	// Iterator still in progress, wait for either a data or an error event
+	select {
+	case log := <-it.logs:
+		it.Event = new(FunctionOracleRequestFulfilled)
+		if err := it.contract.UnpackLog(it.Event, it.event, log); err != nil {
+			it.fail = err
+			return false
+		}
+		it.Event.Raw = log
+		return true
+
+	case err := <-it.sub.Err():
+		it.done = true
+		it.fail = err
+		return it.Next()
+	}
+}
+
+// Error returns any retrieval or parsing error occurred during filtering.
+func (it *FunctionOracleRequestFulfilledIterator) Error() error {
+	return it.fail
+}
+
+// Close terminates the iteration process, releasing any pending underlying
+// resources.
+func (it *FunctionOracleRequestFulfilledIterator) Close() error {
+	it.sub.Unsubscribe()
+	return nil
+}
+
+// FunctionOracleRequestFulfilled represents a RequestFulfilled event raised by the FunctionOracle contract.
+type FunctionOracleRequestFulfilled struct {
+	Id     [32]byte
+	Node   common.Address
+	Score  *big.Int
+	Result []byte
+	Err    []byte
+	Raw    types.Log // Blockchain specific contextual infos
+}
+
+// FilterRequestFulfilled is a free log retrieval operation binding the contract event 0xd0ceebb26e373797d34f277e1ddb02d72d53e53eb23ebeef0fcbb06191c76ea1.
+//
+// Solidity: event RequestFulfilled(bytes32 indexed id, address indexed node, uint256 score, bytes result, bytes err)
+func (_FunctionOracle *FunctionOracleFilterer) FilterRequestFulfilled(opts *bind.FilterOpts, id [][32]byte, node []common.Address) (*FunctionOracleRequestFulfilledIterator, error) {
+
+	var idRule []interface{}
+	for _, idItem := range id {
+		idRule = append(idRule, idItem)
+	}
+	var nodeRule []interface{}
+	for _, nodeItem := range node {
+		nodeRule = append(nodeRule, nodeItem)
+	}
+
+	logs, sub, err := _FunctionOracle.contract.FilterLogs(opts, "RequestFulfilled", idRule, nodeRule)
+	if err != nil {
+		return nil, err
+	}
+	return &FunctionOracleRequestFulfilledIterator{contract: _FunctionOracle.contract, event: "RequestFulfilled", logs: logs, sub: sub}, nil
+}
+
+// WatchRequestFulfilled is a free log subscription operation binding the contract event 0xd0ceebb26e373797d34f277e1ddb02d72d53e53eb23ebeef0fcbb06191c76ea1.
+//
+// Solidity: event RequestFulfilled(bytes32 indexed id, address indexed node, uint256 score, bytes result, bytes err)
+func (_FunctionOracle *FunctionOracleFilterer) WatchRequestFulfilled(opts *bind.WatchOpts, sink chan<- *FunctionOracleRequestFulfilled, id [][32]byte, node []common.Address) (event.Subscription, error) {
+
+	var idRule []interface{}
+	for _, idItem := range id {
+		idRule = append(idRule, idItem)
+	}
+	var nodeRule []interface{}
+	for _, nodeItem := range node {
+		nodeRule = append(nodeRule, nodeItem)
+	}
+
+	logs, sub, err := _FunctionOracle.contract.WatchLogs(opts, "RequestFulfilled", idRule, nodeRule)
+	if err != nil {
+		return nil, err
+	}
+	return event.NewSubscription(func(quit <-chan struct{}) error {
+		defer sub.Unsubscribe()
+		for {
+			select {
+			case log := <-logs:
+				// New log arrived, parse the event and forward to the user
+				event := new(FunctionOracleRequestFulfilled)
+				if err := _FunctionOracle.contract.UnpackLog(event, "RequestFulfilled", log); err != nil {
+					return err
+				}
+				event.Raw = log
+
+				select {
+				case sink <- event:
+				case err := <-sub.Err():
+					return err
+				case <-quit:
+					return nil
+				}
+			case err := <-sub.Err():
+				return err
+			case <-quit:
+				return nil
+			}
+		}
+	}), nil
+}
+
+// ParseRequestFulfilled is a log parse operation binding the contract event 0xd0ceebb26e373797d34f277e1ddb02d72d53e53eb23ebeef0fcbb06191c76ea1.
+//
+// Solidity: event RequestFulfilled(bytes32 indexed id, address indexed node, uint256 score, bytes result, bytes err)
+func (_FunctionOracle *FunctionOracleFilterer) ParseRequestFulfilled(log types.Log) (*FunctionOracleRequestFulfilled, error) {
+	event := new(FunctionOracleRequestFulfilled)
+	if err := _FunctionOracle.contract.UnpackLog(event, "RequestFulfilled", log); err != nil {
 		return nil, err
 	}
 	event.Raw = log

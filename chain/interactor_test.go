@@ -5,6 +5,8 @@ import (
 	"encoding/hex"
 	"fmt"
 	"math/big"
+	"strconv"
+	"strings"
 	"testing"
 	"time"
 
@@ -41,11 +43,14 @@ func TestParseLog(t *testing.T) {
 func TestInteractor_FulfillRequest(t *testing.T) {
 	t.Skip()
 	config.SetEnv(
-		12345678, "ws://127.0.0.1:9546",
+		12345678, "ws://210.73.218.170:9546",
 		"0xf40E44EbE417A844BA3C4CeFC8bfF7ab38C483F0", "0x0000000000000000000000000000000000002004",
 		"", "test",
 		"./testdata/UTC--2023-06-05T09-50-10.886531000Z--989777e983d4fccba32d857d797fdb75c27571c5", "123456",
 	)
+	reqIdHex := "26f826bf5493d96559904bcde50d2efea4acb3ad2d770a54c2bd2c44670a1da0"
+
+	accountAddress := common.HexToAddress("0x57A90337cAcDa7b13be6d4308bfCaf3C1d470e6e")
 
 	chainConfig := config.LoadChainConfig()
 	ethCli, err := ethclient.Dial(chainConfig.Addr)
@@ -53,15 +58,27 @@ func TestInteractor_FulfillRequest(t *testing.T) {
 		logger.Error("failed to connect to ", "node addr", chainConfig.Addr)
 		return
 	}
-
+	blockNumber, err := ethCli.BlockNumber(context.Background())
+	if err != nil {
+		logger.Error("failed to get block number", "err", err)
+		return
+	}
+	nonce, err := ethCli.NonceAt(context.Background(), accountAddress, big.NewInt(int64(blockNumber)))
+	if err != nil {
+		logger.Error("failed to get nonce", "err", err)
+		return
+	}
 	oracleCli, err := actor.NewFunctionOracle(common.HexToAddress(chainConfig.FuncOracleClientAddr()), ethCli)
 	if err != nil {
 		logger.Error("failed to new function consumer", "err", err)
 		return
 	}
 
-	data, err := hex.DecodeString("26f826bf5493d96559904bcde50d2efea4acb3ad2d770a54c2bd2c44670a1da0")
-	fmt.Println(data, " ", err)
+	data, err := hex.DecodeString(reqIdHex)
+	if err != nil {
+		logger.Error("failed to decode req id", "err", err)
+		return
+	}
 	requestId := [32]byte(data)
 
 	fmt.Println(hex.EncodeToString(requestId[:]))
@@ -79,12 +96,15 @@ func TestInteractor_FulfillRequest(t *testing.T) {
 		logger.Error("failed to new keyed tx", "err", err)
 		return
 	}
+	gasPrice := HexToInt64("0x3b9aca00") + 1
 
-	logger.Info("start to fulfill request")
+	logger.Info("start to fulfill request", "gas price", gasPrice)
 	tx, err := oracleCli.FulfillRequestByNode(&bind.TransactOpts{
-		From:   auth.From,
-		Signer: auth.Signer,
-	}, requestId, common.HexToAddress(chainConfig.FuncClientAddr()), new(big.Int).SetInt64(3425), []byte("resp"), []byte(""))
+		From:     auth.From,
+		Signer:   auth.Signer,
+		Nonce:    big.NewInt(int64(nonce + 1)),
+		GasPrice: big.NewInt(gasPrice),
+	}, requestId, new(big.Int).SetInt64(3425), []byte("resp"), []byte(""))
 	if err != nil {
 		logger.Error("cannot send FulfillRequestByNode tx", "requestId", requestId, "err", err)
 		return
@@ -129,4 +149,17 @@ func TestSubscriber_Send(t *testing.T) {
 		return
 	}
 	logger.Info("receive tx ", "tx hash", data.Raw.TxHash.String(), "reqId", hex.EncodeToString(data.Id[:]))
+}
+
+func HexToInt64(hexString string) int64 {
+	// replace 0x or 0X with empty String
+	numberStr := strings.Replace(hexString, "0x", "", -1)
+	numberStr = strings.Replace(numberStr, "0X", "", -1)
+	output, err := strconv.ParseInt(numberStr, 16, 64)
+	if err != nil {
+		fmt.Println(err)
+		return 0
+	}
+	return output
+
 }

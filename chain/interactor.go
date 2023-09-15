@@ -175,8 +175,8 @@ func (cs *Interactor) FulfillRequest() {
 
 					sink := make(chan *actor.FunctionOracleOracleResponse)
 					defer close(sink)
-					ctx, cancle := context.WithTimeout(context.Background(), time.Second*30)
-					defer cancle()
+					ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
+					defer cancel()
 					respSub, err2 := cs.oracleClient.WatchOracleResponse(&bind.WatchOpts{Context: ctx}, sink, [][32]byte{requestId})
 					if err2 != nil {
 						return err2
@@ -193,7 +193,7 @@ func (cs *Interactor) FulfillRequest() {
 						From:     auth.From,
 						Signer:   auth.Signer,
 						GasPrice: gasPrice,
-					}, requestId, common.HexToAddress(cs.Configure.FuncClientAddr()), new(big.Int).SetInt64(ret.NodeScore), ret.Resp, ret.Err)
+					}, requestId, new(big.Int).SetInt64(ret.NodeScore), ret.Resp, ret.Err)
 					if err2 != nil {
 						logger.Error("cannot send FulfillRequestByNode tx", "requestId", reqID, "err", err2)
 						return errors.WithMessagef(err2, "cannot send FulfillRequestByNode tx")

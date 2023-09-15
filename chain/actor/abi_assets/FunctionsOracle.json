@@ -122,6 +122,43 @@
 		"type": "event"
 	},
 	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "bytes32",
+				"name": "id",
+				"type": "bytes32"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "node",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "score",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "bytes",
+				"name": "result",
+				"type": "bytes"
+			},
+			{
+				"indexed": false,
+				"internalType": "bytes",
+				"name": "err",
+				"type": "bytes"
+			}
+		],
+		"name": "RequestFulfilled",
+		"type": "event"
+	},
+	{
 		"inputs": [],
 		"name": "EXPIRY_TIME",
 		"outputs": [
@@ -153,11 +190,6 @@
 				"internalType": "bytes32",
 				"name": "_requestId",
 				"type": "bytes32"
-			},
-			{
-				"internalType": "address",
-				"name": "oracleAddress",
-				"type": "address"
 			},
 			{
 				"internalType": "uint256",

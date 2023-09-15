@@ -27,6 +27,7 @@ type Chain struct {
 	KeyFilePath        string `mapstructure:"key_file_path" json:"key_file_path"`
 	KeyPassword        string `mapstructure:"key_password" json:"key_password"`
 	KeyBass64          string `mapstructure:"key_base64" json:"key_base64"`
+	key                *keystore.Key
 }
 
 func LoadChainConfig() *Chain {
@@ -100,7 +101,10 @@ func (c Chain) ChainAddr() string {
 	return c.Addr
 }
 
-func (c Chain) Key() *keystore.Key {
+func (c *Chain) Key() *keystore.Key {
+	if c.key != nil {
+		return c.key
+	}
 	var (
 		keyBytes []byte
 		err      error
@@ -122,11 +126,11 @@ func (c Chain) Key() *keystore.Key {
 		logger.Fatal("not found key")
 	}
 
-	key, err := keystore.DecryptKey(keyBytes, c.KeyPassword)
+	c.key, err = keystore.DecryptKey(keyBytes, c.KeyPassword)
 	if err != nil {
 		logger.Fatal("wrong key", "key", string(keyBytes), "pw", c.KeyPassword)
 	}
-	return key
+	return c.key
 }
 
 func (c Chain) FuncClientAddr() string {

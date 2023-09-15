@@ -172,50 +172,65 @@ func (cs *Interactor) FulfillRequest() {
 					if !cs.isRenewed.Load() {
 						return errors.New("subscriber is resubscribing, isRenewed is false")
 					}
-
-					sink := make(chan *actor.FunctionOracleOracleResponse)
-					defer close(sink)
-					ctx, cancel := context.WithTimeout(context.Background(), time.Second*30)
-					defer cancel()
-					respSub, err2 := cs.oracleClient.WatchOracleResponse(&bind.WatchOpts{Context: ctx}, sink, [][32]byte{requestId})
-					if err2 != nil {
-						return err2
+					var (
+						nonce    uint64
+						retryErr error
+					)
+					blockNumber, retryErr := cs.ethCli.BlockNumber(context.Background())
+					if retryErr != nil {
+						logger.Error("failed to get block number", "err", err)
+					} else {
+						nonce, retryErr = cs.ethCli.NonceAt(context.Background(), cs.Key().Address, big.NewInt(int64(blockNumber)))
+						if err != nil {
+							logger.Error("failed to get nonce", "err", err)
+							return retryErr
+						}
 					}
-					defer respSub.Unsubscribe()
-					gasPrice, err2 := cs.ethCli.SuggestGasPrice(ctx)
-					if err2 != nil {
+
+					gasPrice, retryErr := cs.ethCli.SuggestGasPrice(context.Background())
+					if retryErr != nil {
 						logger.Error("failed to get suggest gas price", "err", err)
 						gasPrice = defaultGasPrice
 					}
+					sink := make(chan *actor.FunctionOracleOracleResponse)
+					defer close(sink)
+					ctx, cancel := context.WithTimeout(context.Background(), time.Second*40)
+					defer cancel()
+					respSub, retryErr := cs.oracleClient.WatchOracleResponse(&bind.WatchOpts{Context: ctx}, sink, [][32]byte{requestId})
+					if retryErr != nil {
+						return retryErr
+					}
+					defer respSub.Unsubscribe()
 
 					logger.Info("start to fulfill request", "gas price", gasPrice.String())
-					tx, err2 := cs.oracleClient.FulfillRequestByNode(&bind.TransactOpts{
+					tx, retryErr := cs.oracleClient.FulfillRequestByNode(&bind.TransactOpts{
 						From:     auth.From,
 						Signer:   auth.Signer,
-						GasPrice: gasPrice,
+						GasPrice: gasPrice.Add(gasPrice, big.NewInt(1)),
+						Nonce:    big.NewInt(int64(nonce)),
 					}, requestId, new(big.Int).SetInt64(ret.NodeScore), ret.Resp, ret.Err)
-					if err2 != nil {
-						logger.Error("cannot send FulfillRequestByNode tx", "requestId", reqID, "err", err2)
-						return errors.WithMessagef(err2, "cannot send FulfillRequestByNode tx")
+					if retryErr != nil {
+						logger.Error("cannot send FulfillRequestByNode tx", "requestId", reqID, "err", retryErr)
+						return errors.WithMessagef(retryErr, "cannot send FulfillRequestByNode tx")
 					}
 					logger.Info("wait to chain log event")
 					select {
 					case <-ctx.Done():
-						err2 = ctx.Err()
+						retryErr = ctx.Err()
 						logger.Error("wait to FulfillRequestByNode finish timeout", "err", ctx.Err())
 					case resp := <-sink:
 						logger.Info("node fulfilled request", "tx hash", tx.Hash().String(), "blockNumber", resp.Raw.BlockNumber, "tx", resp.Raw.TxHash)
 
-					case err2 = <-respSub.Err():
-						logger.Error("failed to send resp", "err", err2)
+					case retryErr = <-respSub.Err():
+						logger.Error("failed to send resp", "err", retryErr)
 						//return err
 					}
 					logger.Info("finish waiting to chain log event")
-					return err2
+					return retryErr
 				},
 				retry.Attempts(5),
-				retry.Delay(500*time.Millisecond),
-				retry.MaxDelay(3*time.Second),
+				retry.Delay(10*time.Millisecond),
+				retry.MaxDelay(60*time.Second),
 			)
 
 			if err != nil {

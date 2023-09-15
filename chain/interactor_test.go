@@ -32,7 +32,7 @@ func TestParseLog(t *testing.T) {
 		FunctionName:       "test1",
 	}
 	// key file path
-	sub := NewSubscriber(cfg)
+	sub := NewSubscriber(&cfg)
 	defer sub.Clean()
 	//sub.ConnectLoop()
 	//go sub.watch()
@@ -132,7 +132,7 @@ func TestSubscriber_Send(t *testing.T) {
 		KeyPassword:        "123456",
 	}
 	// key file path
-	sub := NewSubscriber(cfg)
+	sub := NewSubscriber(&cfg)
 	sink := make(chan *actor.FunctionClientRequestFulfilled)
 	defer close(sink)
 	time.Sleep(time.Second * 2)

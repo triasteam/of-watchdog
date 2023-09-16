@@ -166,6 +166,16 @@ func (cs *Interactor) FulfillRequest() {
 				logger.Error("unexpected requestId", "requestId", string(reqID))
 				continue
 			}
+			var nonce uint64
+			blockNumber, err := cs.ethCli.BlockNumber(context.Background())
+			if err != nil {
+				logger.Error("failed to get block number", "err", err)
+			} else {
+				nonce, err = cs.ethCli.NonceAt(context.Background(), cs.Key().Address, big.NewInt(int64(blockNumber)))
+				if err != nil {
+					logger.Error("failed to get nonce", "err", err)
+				}
+			}
 			requestId := [32]byte(reqID)
 			err = retry.Do(
 				func() error {
@@ -173,23 +183,12 @@ func (cs *Interactor) FulfillRequest() {
 						return errors.New("subscriber is resubscribing, isRenewed is false")
 					}
 					var (
-						nonce    uint64
 						retryErr error
 					)
-					blockNumber, retryErr := cs.ethCli.BlockNumber(context.Background())
-					if retryErr != nil {
-						logger.Error("failed to get block number", "err", err)
-					} else {
-						nonce, retryErr = cs.ethCli.NonceAt(context.Background(), cs.Key().Address, big.NewInt(int64(blockNumber)))
-						if err != nil {
-							logger.Error("failed to get nonce", "err", err)
-							return retryErr
-						}
-					}
 
 					gasPrice, retryErr := cs.ethCli.SuggestGasPrice(context.Background())
 					if retryErr != nil {
-						logger.Error("failed to get suggest gas price", "err", err)
+						logger.Error("failed to get suggest gas price", "err", retryErr)
 						gasPrice = defaultGasPrice
 					}
 					sink := make(chan *actor.FunctionClientRequestFulfilled)
@@ -202,7 +201,7 @@ func (cs *Interactor) FulfillRequest() {
 					}
 					defer respSub.Unsubscribe()
 
-					logger.Info("start to fulfill request", "gas price", gasPrice.String())
+					logger.Info("start to fulfill request", "gas price", gasPrice.String(), "nonce", nonce)
 					tx, retryErr := cs.functionClient.HandleOracleFulfillment(&bind.TransactOpts{
 						From:     auth.From,
 						Signer:   auth.Signer,
@@ -210,14 +209,14 @@ func (cs *Interactor) FulfillRequest() {
 						Nonce:    big.NewInt(int64(nonce)),
 					}, requestId, new(big.Int).SetInt64(ret.NodeScore), ret.Resp, ret.Err)
 					if retryErr != nil {
-						logger.Error("cannot send FulfillRequestByNode tx", "requestId", reqID, "err", retryErr)
-						return errors.WithMessagef(retryErr, "cannot send FulfillRequestByNode tx")
+						logger.Error("cannot send HandleOracleFulfillment tx", "requestId", reqID, "err", retryErr)
+						return errors.WithMessagef(retryErr, "cannot send HandleOracleFulfillment tx")
 					}
 					logger.Info("wait to chain log event")
 					select {
 					case <-ctx.Done():
 						retryErr = ctx.Err()
-						logger.Error("wait to FulfillRequestByNode finish timeout", "err", ctx.Err())
+						logger.Error("wait to HandleOracleFulfillment finish timeout", "err", ctx.Err())
 					case resp := <-sink:
 						logger.Info("node fulfilled request", "tx hash", tx.Hash().String(), "blockNumber", resp.Raw.BlockNumber, "tx", resp.Raw.TxHash)
 

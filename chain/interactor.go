@@ -176,6 +176,11 @@ func (cs *Interactor) FulfillRequest() {
 					logger.Error("failed to get nonce", "err", err)
 				}
 			}
+			gasPrice, err := cs.ethCli.SuggestGasPrice(context.Background())
+			if err != nil {
+				logger.Error("failed to get suggest gas price", "err", err)
+				gasPrice = defaultGasPrice
+			}
 			requestId := [32]byte(reqID)
 			err = retry.Do(
 				func() error {
@@ -185,46 +190,45 @@ func (cs *Interactor) FulfillRequest() {
 					var (
 						retryErr error
 					)
-
-					gasPrice, retryErr := cs.ethCli.SuggestGasPrice(context.Background())
-					if retryErr != nil {
-						logger.Error("failed to get suggest gas price", "err", retryErr)
-						gasPrice = defaultGasPrice
-					}
-					sink := make(chan *actor.FunctionClientRequestFulfilled)
-					defer close(sink)
+					gasPrice = gasPrice.Add(gasPrice, big.NewInt(1))
 					ctx, cancel := context.WithTimeout(context.Background(), time.Second*40)
 					defer cancel()
-					respSub, retryErr := cs.functionClient.WatchRequestFulfilled(&bind.WatchOpts{Context: ctx}, sink, [][32]byte{requestId}, nil)
-					if retryErr != nil {
-						return retryErr
-					}
-					defer respSub.Unsubscribe()
+					//sink := make(chan *actor.FunctionClientRequestFulfilled)
+					//defer close(sink)
+					//respSub, retryErr := cs.functionClient.WatchRequestFulfilled(&bind.WatchOpts{Context: ctx}, sink, [][32]byte{requestId}, nil)
+					//if retryErr != nil {
+					//	return retryErr
+					//}
+					//defer respSub.Unsubscribe()
 
 					logger.Info("start to fulfill request", "gas price", gasPrice.String(), "nonce", nonce)
 					tx, retryErr := cs.functionClient.HandleOracleFulfillment(&bind.TransactOpts{
 						From:     auth.From,
 						Signer:   auth.Signer,
-						GasPrice: gasPrice.Add(gasPrice, big.NewInt(1)),
+						GasPrice: gasPrice,
 						Nonce:    big.NewInt(int64(nonce)),
 					}, requestId, new(big.Int).SetInt64(ret.NodeScore), ret.Resp, ret.Err)
 					if retryErr != nil {
-						logger.Error("cannot send HandleOracleFulfillment tx", "requestId", reqID, "err", retryErr)
-						return errors.WithMessagef(retryErr, "cannot send HandleOracleFulfillment tx")
+						logger.Error("cannot send HandleOracleFulfillment tx", "from", auth.From, "gasPrice", gasPrice.String(), "nonce", nonce, "requestId", reqID, "err", retryErr)
+						return errors.WithMessagef(retryErr, "cannot send HandleOracleFulfillment tx,from %s,", auth.From)
 					}
-					logger.Info("wait to chain log event")
-					select {
-					case <-ctx.Done():
-						retryErr = ctx.Err()
-						logger.Error("wait to HandleOracleFulfillment finish timeout", "err", ctx.Err())
-					case resp := <-sink:
-						logger.Info("node fulfilled request", "tx hash", tx.Hash().String(), "blockNumber", resp.Raw.BlockNumber, "tx", resp.Raw.TxHash)
-
-					case retryErr = <-respSub.Err():
-						logger.Error("failed to send resp", "err", retryErr)
-						//return err
+					mined, retryErr := bind.WaitMined(ctx, cs.ethCli, tx)
+					if retryErr != nil {
+						return retryErr
 					}
-					logger.Info("finish waiting to chain log event")
+					//logger.Info("wait to chain log event")
+					//select {
+					//case <-ctx.Done():
+					//	retryErr = ctx.Err()
+					//	logger.Error("wait to HandleOracleFulfillment finish timeout", "err", ctx.Err())
+					//case resp := <-sink:
+					//	logger.Info("node fulfilled request", "tx hash", tx.Hash().String(), "blockNumber", resp.Raw.BlockNumber, "tx", resp.Raw.TxHash)
+					//
+					//case retryErr = <-respSub.Err():
+					//	logger.Error("failed to send resp", "err", retryErr)
+					//	//return err
+					//}
+					logger.Info("finish waiting to mint tx", "from", auth.From, "number", mined.BlockNumber.String(), "tx hash", mined.TxHash.String())
 					return retryErr
 				},
 				retry.Attempts(5),

@@ -18,17 +18,22 @@ import (
 type loggingResponseWriter struct {
 	http.ResponseWriter
 	statusCode int
+	bodyBytes  []byte
 }
 
 func NewLoggingResponseWriter(w http.ResponseWriter) *loggingResponseWriter {
 	// WriteHeader(int) is not called if our response implicitly returns 200 OK, so
 	// we default to that status code.
-	return &loggingResponseWriter{w, http.StatusOK}
+	return &loggingResponseWriter{w, http.StatusOK, []byte{}}
 }
 
 func (lrw *loggingResponseWriter) WriteHeader(code int) {
 	lrw.statusCode = code
 	lrw.ResponseWriter.WriteHeader(code)
+}
+func (lrw *loggingResponseWriter) Write(data []byte) (int, error) {
+	lrw.bodyBytes = data
+	return lrw.ResponseWriter.Write(data)
 }
 
 type ChainHandler struct {
@@ -59,9 +64,8 @@ func (ch *ChainHandler) MakeChainHandler(preHandler http.Handler) http.HandlerFu
 	return func(w http.ResponseWriter, r *http.Request) {
 		logger.Info("go into MakeChainHandler")
 		var (
-			bodyBytes []byte
-			errBytes  []byte
-			err       error
+			errBytes []byte
+			err      error
 		)
 
 		lrw := NewLoggingResponseWriter(w)
@@ -69,13 +73,7 @@ func (ch *ChainHandler) MakeChainHandler(preHandler http.Handler) http.HandlerFu
 		preHandler.ServeHTTP(lrw, r)
 
 		if lrw.statusCode != http.StatusOK {
-			// Copy the body over
-			_, err = io.CopyBuffer(w, bytes.NewReader(errBytes), nil)
-
-		} else {
-			// Copy the body over
-			_, err = io.CopyBuffer(w, bytes.NewReader(bodyBytes), nil)
-
+			_, err = io.CopyBuffer(bytes.NewBuffer(errBytes), bytes.NewReader(lrw.bodyBytes), nil)
 		}
 		if err != nil {
 			logger.Error("failed to copy response body", "err", err)
@@ -90,7 +88,7 @@ func (ch *ChainHandler) MakeChainHandler(preHandler http.Handler) http.HandlerFu
 		logger.Info("get requestId", "v", reqId)
 		ret := &chain.FulFilledRequest{
 			RequestId: reqId,
-			Resp:      bodyBytes,
+			Resp:      lrw.bodyBytes,
 			NodeScore: ch.GetLocalWorkScore(),
 			Err:       errBytes,
 		}

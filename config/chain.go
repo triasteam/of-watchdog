@@ -27,6 +27,7 @@ type Chain struct {
 	KeyFilePath        string `mapstructure:"key_file_path" json:"key_file_path"`
 	KeyPassword        string `mapstructure:"key_password" json:"key_password"`
 	KeyBass64          string `mapstructure:"key_base64" json:"key_base64"`
+	Disable            bool   `mapstructure:"disable" json:"disable"`
 	key                *keystore.Key
 }
 
@@ -56,8 +57,10 @@ func LoadChainConfig() *Chain {
 		logger.Fatal("fail to unmarshal chain Config", "err", err)
 	}
 	logger.Info("successfully unmarshal chain config", "value", cfg)
-	if err = validateChainConfig(cfg); err != nil {
-		logger.Fatal("fail to validate chain Config", "err", err)
+	if !cfg.Disable {
+		if err = validateChainConfig(cfg); err != nil {
+			logger.Fatal("fail to validate chain Config", "err", err)
+		}
 	}
 
 	logger.Info("successfully load to chain config", "value", cfg)

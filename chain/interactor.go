@@ -74,10 +74,24 @@ func NewSubscriber(cfg Configure) *Interactor {
 }
 
 func (cs *Interactor) Clean() {
+	if cs == nil {
+		return
+	}
 	cs.cleanOnce.Do(func() {
-		close(cs.renewChan)
-		close(cs.dailEthDone)
-		cs.ethCli.Close()
+		defer func() {
+			if err := recover(); err != nil {
+				logger.Error("recover", "value", err)
+			}
+		}()
+		if cs.renewChan != nil {
+			close(cs.renewChan)
+		}
+		if cs.dailEthDone != nil {
+			close(cs.dailEthDone)
+		}
+		if cs.ethCli != nil {
+			cs.ethCli.Close()
+		}
 	})
 
 }

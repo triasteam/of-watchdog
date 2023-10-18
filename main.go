@@ -80,10 +80,14 @@ func main() {
 	logger.Info("watch dog info", "Watchdog mode", config.WatchdogMode(watchdogConfig.OperationalMode), "fprocess", watchdogConfig.FunctionProcess)
 
 	chainConfig := config.LoadChainConfig()
-	publisher := chain.NewSubscriber(chainConfig)
+	var publisher *chain.Interactor
 	defer publisher.Clean()
-	chainHandler := executor.NewChainHandler(publisher, chainConfig.VerifierScoreAddr(), watchdogConfig.UpstreamURL, watchdogConfig.ExecTimeout)
-	requestHandler = chainHandler.MakeChainHandler(baseFunctionHandler)
+
+	if !chainConfig.Disable {
+		publisher = chain.NewSubscriber(chainConfig)
+		chainHandler := executor.NewChainHandler(publisher, chainConfig.VerifierScoreAddr(), watchdogConfig.UpstreamURL, watchdogConfig.ExecTimeout)
+		requestHandler = chainHandler.MakeChainHandler(baseFunctionHandler)
+	}
 
 	httpMetrics := metrics.NewHttp()
 	http.HandleFunc("/", metrics.InstrumentHandler(requestHandler, httpMetrics))

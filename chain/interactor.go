@@ -166,16 +166,7 @@ func (cs *Interactor) FulfillRequest() {
 				logger.Error("unexpected requestId", "requestId", string(reqID))
 				continue
 			}
-			var nonce uint64
-			blockNumber, err := cs.ethCli.BlockNumber(context.Background())
-			if err != nil {
-				logger.Error("failed to get block number", "err", err)
-			} else {
-				nonce, err = cs.ethCli.NonceAt(context.Background(), cs.Key().Address, big.NewInt(int64(blockNumber)))
-				if err != nil {
-					logger.Error("failed to get nonce", "err", err)
-				}
-			}
+
 			gasPrice, err := cs.ethCli.SuggestGasPrice(context.Background())
 			if err != nil {
 				logger.Error("failed to get suggest gas price", "err", err)
@@ -200,7 +191,10 @@ func (cs *Interactor) FulfillRequest() {
 					//	return retryErr
 					//}
 					//defer respSub.Unsubscribe()
-
+					nonce, retryErr := cs.ethCli.NonceAt(context.Background(), cs.Key().Address, nil)
+					if err != nil {
+						logger.Error("failed to get nonce", "err", err)
+					}
 					logger.Info("start to fulfill request", "gas price", gasPrice.String(), "nonce", nonce)
 					tx, retryErr := cs.functionClient.HandleOracleFulfillment(&bind.TransactOpts{
 						From:     auth.From,

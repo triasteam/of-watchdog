@@ -93,6 +93,7 @@ func (ch *ChainHandler) MakeChainHandler(preHandler http.Handler) http.HandlerFu
 			Err:       errBytes,
 		}
 
+		// TODO: chain handler can disable
 		ch.publisher.Reply(ret)
 	}
 

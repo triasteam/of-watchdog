@@ -20,12 +20,12 @@ import (
 )
 
 func TestParseLog(t *testing.T) {
-	t.Skip()
+	//t.Skip()
 
 	cfg := config.Chain{
 		Id:                 12345678,
-		Addr:               "ws://127.0.0.1:9546",
-		FunctionClientAddr: "0xE8935Af625542fc62A866784F5f490636d9dbC66",
+		Addr:               "ws://210.73.218.170:9546",
+		FunctionClientAddr: "0x2Be3786056F885FdB4d0C032497cd2d1dD743747",
 		FunctionOracleAddr: "0x0000000000000000000000000000000000002004",
 		KeyFilePath:        "./testdata/UTC--2023-06-05T09-50-10.886531000Z--989777e983d4fccba32d857d797fdb75c27571c5",
 		KeyPassword:        "123456",

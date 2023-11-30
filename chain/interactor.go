@@ -7,13 +7,14 @@ import (
 	"sync"
 	"time"
 
+	"github.com/ethereum/go-ethereum/crypto"
+
 	"github.com/avast/retry-go/v4"
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/openfaas/of-watchdog/chain/actor"
 	"github.com/openfaas/of-watchdog/logger"
@@ -217,9 +218,10 @@ func (cs *Interactor) FulfillRequest() {
 						Nonce:    big.NewInt(int64(nonce)),
 					}, requestId, new(big.Int).SetInt64(ret.NodeScore), ret.Resp, ret.Err)
 					if retryErr != nil {
-						logger.Error("cannot send HandleOracleFulfillment tx", "from", auth.From, "gasPrice", gasPrice.String(), "nonce", nonce, "requestId", reqID, "err", retryErr)
+						logger.Error("cannot send HandleOracleFulfillment tx", "from", auth.From.String(), "gasPrice", gasPrice.String(), "nonce", nonce, "requestId", hex.EncodeToString(reqID), "err", retryErr)
 						return errors.WithMessagef(retryErr, "cannot send HandleOracleFulfillment tx,from %s,", auth.From)
 					}
+					logger.Info("waiting", "tx", tx.Hash().String())
 					mined, retryErr := bind.WaitMined(ctx, cs.ethCli, tx)
 					if retryErr != nil {
 						return retryErr
